@@ -1,0 +1,62 @@
+TOUCH SOUND — GUIDE DE MISE EN PLACE DE L'AUTOMATISATION IA
+==============================================================
+
+Ce guide t'explique, étape par étape, comment brancher le site à
+Auphonic (nettoyage audio IA) et Resend (envoi d'email automatique).
+
+------------------------------------------------------------
+ÉTAPE 1 — Mettre le code sur GitHub (au lieu du zip)
+------------------------------------------------------------
+1. Va sur github.com, connecte-toi.
+2. Clique sur le bouton "+" en haut à droite > "New repository".
+3. Nomme-le "touch-sound-site", laisse-le "Public" ou "Private"
+   (peu importe), puis clique "Create repository".
+4. Sur la page qui s'affiche, clique sur "uploading an existing file".
+5. Glisse TOUT le contenu du dossier touch_project (tous les fichiers
+   et dossiers, y compris "netlify", "assets", "audio") dans la zone.
+6. Clique sur "Commit changes" en bas de la page.
+
+------------------------------------------------------------
+ÉTAPE 2 — Connecter Netlify à ce dépôt GitHub
+------------------------------------------------------------
+1. Sur app.netlify.com, ouvre ton projet touchsound.online.
+2. Va dans "Project configuration" > cherche une option du type
+   "Link repository" ou "Connect to Git provider"
+   (parfois sous "Build & deploy").
+3. Choisis GitHub, autorise Netlify à accéder à ton compte,
+   puis sélectionne le dépôt "touch-sound-site".
+4. Netlify va détecter automatiquement le fichier netlify.toml
+   et configurer les fonctions tout seul.
+5. Laisse les réglages de build par défaut, clique "Deploy".
+
+À partir de maintenant, tu n'as PLUS besoin de glisser de zip —
+tu déposeras juste les nouveaux fichiers sur GitHub (étape 1,
+point 4-6) et Netlify republiera automatiquement.
+
+------------------------------------------------------------
+ÉTAPE 3 — Ajouter les clés secrètes dans Netlify
+------------------------------------------------------------
+Va dans : Project configuration > Environment variables > Add a variable
+
+Ajoute ces 4 variables (une par une) :
+
+  AUPHONIC_USER   = ton nom d'utilisateur Auphonic
+  AUPHONIC_PASS   = ton mot de passe Auphonic
+  RESEND_API_KEY  = ta clé API Resend (resend.com > API Keys > Create)
+  RESEND_FROM     = Touch Sound <notifications@touchsound.online>
+
+Puis redéploie le site une fois (Deploys > Trigger deploy) pour que
+ces variables soient prises en compte.
+
+------------------------------------------------------------
+ÉTAPE 4 — Vérifier que tout fonctionne
+------------------------------------------------------------
+1. Va sur touchsound.online, section "Try It Free".
+2. Uploade un petit fichier audio test avec ton propre nom/email.
+3. Tu dois voir "Got it! Check your email in a few minutes."
+4. Après quelques minutes, un email doit arriver avec le fichier
+   nettoyé.
+
+Si rien ne se passe : va dans Netlify > "Logs & metrics" > "Functions"
+pour voir les messages d'erreur, et montre-les à Claude pour qu'il
+t'aide à corriger.

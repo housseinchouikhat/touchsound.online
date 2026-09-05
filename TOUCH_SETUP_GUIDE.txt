@@ -1,0 +1,40 @@
+TOUCH V2 — FOUNDER EDITION
+
+DESIGN
+- Founder portrait used as a black-and-white pencil-style brand background.
+- Founder-inspired Touch visual identity.
+- Space Grotesk + Inter.
+- Black/white/grey + neon lime.
+- Cyber/editorial/studio aesthetic.
+
+ASSETS
+- assets/touch-founder-sketch.png = full hero/brand artwork.
+- assets/touch-logo-founder.png = reusable founder-inspired logo artwork.
+- audio/before.mp3 and audio/after.mp3 = your real demos.
+
+BEFORE LAUNCH
+1. Replace YOUR_EMAIL_HERE in index.html and script.js.
+2. Add real Before/After audio files.
+3. Create PayPal payment links for $40 / $150 / $280 and place them in script.js.
+4. Publish the folder on Netlify or Vercel.
+5. Connect your domain.
+6. Add Privacy Policy, Terms and Refund/Cancellation pages.
+7. For real uploads, connect a secure storage backend. Recommended architecture: Supabase Storage.
+8. For a production agency portal, add authentication, orders, engineer assignment, QC, delivery and notifications.
+
+IMPORTANT
+The local file picker in this version is ONLY a frontend demonstration. It does not send the audio file to a server yet.
+
+NEXT V2.1
+- Real PayPal checkout
+- Secure audio upload
+- Client order ID
+- Confirmation email
+- Engineer dashboard
+- Delivery link
+
+NEXT V3
+- Full client portal
+- Recurring subscriptions
+- Team management for 10 engineers
+- Automated workflow
