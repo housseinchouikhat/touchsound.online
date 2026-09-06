@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const { getStore } = require('@netlify/blobs');
 
 // Minimal multipart/form-data parser (no external dependency needed)
 function parseMultipart(event) {
@@ -66,13 +65,18 @@ exports.handler = async (event) => {
     const SITE_URL = process.env.SITE_URL || `https://${event.headers.host}`;
     const auth = Buffer.from(`${AUPHONIC_USER}:${AUPHONIC_PASS}`).toString('base64');
 
+    // Encode name+email directly into the production title so we don't need
+    // any external storage — the webhook callback will decode it back.
+    const encoded = Buffer.from(JSON.stringify({ name, email })).toString('base64');
+    const title = `TSFREE::${encoded}`;
+
     // Build a multipart body for the Auphonic API request
     const boundary = '----TouchSoundBoundary' + crypto.randomBytes(12).toString('hex');
     const textField = (fieldName, value) =>
       `--${boundary}\r\nContent-Disposition: form-data; name="${fieldName}"\r\n\r\n${value}\r\n`;
 
     const preamble =
-      textField('title', `Touch Sound Free Sample - ${name}`) +
+      textField('title', title) +
       textField('action', 'start') +
       textField('webhook', `${SITE_URL}/.netlify/functions/auphonic-callback`) +
       textField('output_files', JSON.stringify([{ format: 'mp3' }])) +
@@ -106,9 +110,6 @@ exports.handler = async (event) => {
     }
 
     const uuid = auphonicData.data.uuid;
-
-    const store = getStore('pending-productions');
-    await store.setJSON(uuid, { name, email, createdAt: Date.now() });
 
     return { statusCode: 200, body: JSON.stringify({ success: true, uuid }) };
   } catch (err) {
