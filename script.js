@@ -1,3 +1,4 @@
+
 const menu=document.getElementById('menu');
 const nav=document.getElementById('navLinks');
 const plan=document.getElementById('plan');
@@ -75,7 +76,7 @@ sampleForm?.addEventListener('submit',async(e)=>{
     const res=await fetch('/.netlify/functions/start-production',{method:'POST',body:data});
     const json=await res.json().catch(()=>({}));
     if(res.ok && json.success){
-      sampleStatus.textContent='Got it! Check your email in a few minutes for your cleaned sample.';
+      sampleStatus.textContent='Got it! We\'ll email you your cleaned sample within 24 hours.';
       sampleStatus.style.color='#d9ff2f';
       sampleForm.reset();
       document.getElementById('fileNames')?.textContent;
