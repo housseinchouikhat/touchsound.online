@@ -1,5 +1,3 @@
-const { getStore } = require('@netlify/blobs');
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' };
@@ -8,19 +6,21 @@ exports.handler = async (event) => {
   try {
     const payload = JSON.parse(event.body || '{}');
     const data = payload.data || payload;
-    const uuid = data.uuid;
     const status = data.status_string || data.status;
+    const title = data.title || '';
 
-    if (!uuid) {
-      return { statusCode: 400, body: 'Missing uuid' };
+    if (!title.startsWith('TSFREE::')) {
+      // Not one of our free-sample productions — ignore quietly
+      return { statusCode: 200, body: 'Not a Touch Sound free sample' };
     }
 
-    const store = getStore('pending-productions');
-    const info = await store.get(uuid, { type: 'json' });
-
-    if (!info) {
-      // Already processed, or not one of ours — acknowledge quietly
-      return { statusCode: 200, body: 'No matching submission' };
+    let info;
+    try {
+      const encoded = title.slice('TSFREE::'.length);
+      info = JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'));
+    } catch (decodeErr) {
+      console.error('Could not decode title payload:', decodeErr);
+      return { statusCode: 200, body: 'Could not decode submission info' };
     }
 
     // Only proceed once Auphonic reports the production is actually done
@@ -71,8 +71,6 @@ exports.handler = async (event) => {
       const errText = await emailRes.text();
       console.error('Resend error:', errText);
     }
-
-    await store.delete(uuid);
 
     return { statusCode: 200, body: 'OK' };
   } catch (err) {
