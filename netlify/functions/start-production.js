@@ -1,6 +1,6 @@
-const crypto = require('crypto');
+// Receives the uploaded test clip, emails it to Touch Sound (as an attachment)
+// for manual review, and sends the tester a confirmation email.
 
-// Minimal multipart/form-data parser (no external dependency needed)
 function parseMultipart(event) {
   const contentType = event.headers['content-type'] || event.headers['Content-Type'] || '';
   const boundaryMatch = contentType.match(/boundary=(.*)$/);
@@ -55,63 +55,64 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing name, email, or file' }) };
     }
 
-    const AUPHONIC_USER = process.env.AUPHONIC_USER;
-    const AUPHONIC_PASS = process.env.AUPHONIC_PASS;
-    if (!AUPHONIC_USER || !AUPHONIC_PASS) {
-      console.error('Missing Auphonic credentials in environment variables');
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    const RESEND_FROM = process.env.RESEND_FROM || 'Touch Sound <notifications@touchsound.online>';
+
+    if (!RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY environment variable');
       return { statusCode: 500, body: JSON.stringify({ error: 'Server not configured' }) };
     }
 
-    const SITE_URL = process.env.SITE_URL || `https://${event.headers.host}`;
-    const auth = Buffer.from(`${AUPHONIC_USER}:${AUPHONIC_PASS}`).toString('base64');
+    const fileBase64 = file.buffer.toString('base64');
 
-    // Encode name+email directly into the production title so we don't need
-    // any external storage — the webhook callback will decode it back.
-    const encoded = Buffer.from(JSON.stringify({ name, email })).toString('base64');
-    const title = `TSFREE::${encoded}`;
-
-    // Build a multipart body for the Auphonic API request
-    const boundary = '----TouchSoundBoundary' + crypto.randomBytes(12).toString('hex');
-    const textField = (fieldName, value) =>
-      `--${boundary}\r\nContent-Disposition: form-data; name="${fieldName}"\r\n\r\n${value}\r\n`;
-
-    const preamble =
-      textField('title', title) +
-      textField('action', 'start') +
-      textField('webhook', `${SITE_URL}/.netlify/functions/auphonic-callback`) +
-      textField('output_files', JSON.stringify([{ format: 'mp3' }])) +
-      textField('algorithms', JSON.stringify({ denoise: true, leveler: true, normloudness: true })) +
-      `--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="input_file"; filename="${file.filename}"\r\n` +
-      `Content-Type: ${file.contentType}\r\n\r\n`;
-
-    const closing = `\r\n--${boundary}--\r\n`;
-
-    const auphonicBody = Buffer.concat([
-      Buffer.from(preamble, 'binary'),
-      file.buffer,
-      Buffer.from(closing, 'binary'),
-    ]);
-
-    const auphonicRes = await fetch('https://auphonic.com/api/simple/productions.json', {
+    // 1. Email the clip to Touch Sound for manual review
+    const notifyRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${auth}`,
-        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
       },
-      body: auphonicBody,
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to: 'contact@touchsound.online',
+        subject: `New free sample test from ${name}`,
+        html: `<p>New free sample submitted on touchsound.online.</p>
+               <p><b>Name:</b> ${name}<br><b>Email:</b> ${email}</p>
+               <p>The clip is attached.</p>`,
+        attachments: [
+          {
+            filename: file.filename,
+            content: fileBase64,
+          },
+        ],
+      }),
     });
 
-    const auphonicData = await auphonicRes.json();
-
-    if (!auphonicRes.ok || !auphonicData.data || !auphonicData.data.uuid) {
-      console.error('Auphonic error:', JSON.stringify(auphonicData));
-      return { statusCode: 502, body: JSON.stringify({ error: 'Audio engine error' }) };
+    if (!notifyRes.ok) {
+      const errText = await notifyRes.text();
+      console.error('Resend error (notify):', errText);
+      return { statusCode: 502, body: JSON.stringify({ error: 'Could not send your clip' }) };
     }
 
-    const uuid = auphonicData.data.uuid;
+    // 2. Confirm to the tester
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to: email,
+        subject: 'We got your clip — Touch Sound',
+        html: `<p>Hi ${name},</p>
+               <p>Thanks for trying Touch Sound! We've received your clip and one of our engineers will clean it up personally.</p>
+               <p>You'll receive your free before/after comparison by email within 24 hours.</p>
+               <p>— Touch Sound</p>`,
+      }),
+    });
 
-    return { statusCode: 200, body: JSON.stringify({ success: true, uuid }) };
+    return { statusCode: 200, body: JSON.stringify({ success: true }) };
   } catch (err) {
     console.error('start-production error:', err);
     return { statusCode: 500, body: JSON.stringify({ error: 'Server error' }) };
