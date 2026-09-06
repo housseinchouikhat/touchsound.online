@@ -53,6 +53,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         from: RESEND_FROM,
         to: info.email,
+        cc: 'contact@touchsound.online',
         subject: 'Your free Touch Sound sample is ready 🎧',
         html: `
           <p>Hi ${info.name},</p>
