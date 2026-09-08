@@ -36,6 +36,9 @@
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
+  <div class="hero-wave" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
   <div class="container hero-content">
     <div class="hero-left">
       <div class="eyebrow">AUDIO ENGINEERING • PODCASTS • CREATORS</div>
@@ -126,16 +129,12 @@
 </section>
 
 <section class="manifesto section">
-  <div class="container manifesto-inner">
-    <div class="portrait-card">
-      <img src="assets/touch-logo.png" alt="Touch Sound logo">
-    </div>
-    <div class="manifesto-copy">
-      <div class="eyebrow">THE TOUCH STANDARD</div>
-      <h2>Real people.<br><span>Real ears.</span></h2>
-      <p>Touch was built from professional post-production experience: the goal is simple — make voices cleaner, clearer and more consistent without removing their personality.</p>
-      <div class="signature-line">TOUCH SOUND <span>•</span> HUMAN ENGINEERED</div>
-    </div>
+  <div class="container manifesto-quote">
+    <p class="quote-mark">"</p>
+    <h2>Every episode is opened by hand,<br>in Pro Tools — <span>not by a preset.</span></h2>
+    <div class="touch-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+    <p class="quote-sub">Touch was built from professional post-production experience: the goal is simple — make voices cleaner, clearer and more consistent, without removing their personality.</p>
+    <div class="signature-line">TOUCH SOUND <span>•</span> HUMAN ENGINEERED</div>
   </div>
 </section>
 
@@ -208,7 +207,7 @@
     <form class="form" id="orderForm">
       <div class="row"><label>Full name<input name="name" required placeholder="Your name"></label><label>Email<input name="email" type="email" required placeholder="you@example.com"></label></div>
       <label>Podcast / channel<input name="show" required placeholder="Podcast name"></label>
-      <label>Service<select id="plan" name="plan" required><option value="">Select</option><option value="single">Single Episode — $40</option><option value="creator">Creator — 4 episodes/month — $150</option><option value="pro">Pro — 8 episodes/month — $280</option><option value="custom">Custom / Agency</option></select></label>
+      <label>Service<select id="plan" name="plan" required><option value="">Select</option><option value="single">Single Episode — priced by length</option><option value="creator">Creator — 4 episodes/month — $486</option><option value="pro">Pro — 8 episodes/month — $972</option><option value="custom">Custom / Agency</option></select></label>
       <div class="row"><label>Episode length<input name="duration" placeholder="55 min"></label><label>Tracks<input name="tracks" placeholder="2 WAV tracks"></label></div>
       <label>Project notes<textarea name="notes" rows="4" placeholder="What would you like improved? Deadline?"></textarea></label>
       <label class="file-field"><span>Audio files</span><small>Choose your raw WAV / MP3 files. Secure upload is connected in the next platform version.</small><input id="files" type="file" multiple accept=".wav,.mp3,.m4a,.flac,audio/*"><em id="fileNames">No files selected</em></label>
