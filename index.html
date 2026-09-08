@@ -51,7 +51,7 @@
         <div><b>✓</b> Podcast-ready delivery</div>
       </div>
     </div>
-    <div class="hero-signature">Houssein</div>
+    
   </div>
   <div class="scroll">SCROLL <span>↓</span></div>
 </section>
@@ -128,7 +128,7 @@
 <section class="manifesto section">
   <div class="container manifesto-inner">
     <div class="portrait-card">
-      <img src="assets/touch-logo-founder.png" alt="Touch Sound founder portrait">
+      <img src="assets/touch-logo.png" alt="Touch Sound logo">
     </div>
     <div class="manifesto-copy">
       <div class="eyebrow">THE TOUCH STANDARD</div>
@@ -156,12 +156,29 @@
   <div class="container">
     <div class="section-head">
       <div><div class="eyebrow">PRICING</div><h2>Simple. Transparent.<br><span>Creator-friendly.</span></h2></div>
-      <p>USD pricing for launch. Custom agency/media pricing can be added as Touch scales.</p>
+      <p>$3 per minute of raw audio, $30 minimum. Drag the slider to your episode length.</p>
     </div>
-    <div class="price-grid">
-      <article class="price"><div class="plan">SINGLE</div><h3>$40 <small>/ episode</small></h3><p>For one-off projects and first-time clients.</p><ul><li>Up to 60 minutes</li><li>Voice cleanup</li><li>EQ + dynamics</li><li>Final delivery</li></ul><a class="outline" href="#order" data-plan="single">CHOOSE SINGLE</a></article>
-      <article class="price featured"><div class="popular">MOST POPULAR</div><div class="plan">CREATOR</div><h3>$150 <small>/ month</small></h3><p>For creators publishing consistently.</p><ul><li>4 episodes / month</li><li>Consistent show sound</li><li>Priority queue</li><li>Minor revisions</li></ul><a class="solid" href="#order" data-plan="creator">CHOOSE CREATOR</a></article>
-      <article class="price"><div class="plan">PRO</div><h3>$280 <small>/ month</small></h3><p>For higher-volume shows and teams.</p><ul><li>8 episodes / month</li><li>Priority processing</li><li>Consistent show sound</li><li>Minor revisions</li></ul><a class="outline" href="#order" data-plan="pro">CHOOSE PRO</a></article>
+
+    <div class="price-calc">
+      <div class="calc-top">
+        <div class="calc-label">EPISODE LENGTH</div>
+        <div class="calc-length"><span id="calcMinutes">45</span> minutes of raw audio</div>
+      </div>
+      <input type="range" id="calcSlider" min="5" max="150" step="5" value="45">
+      <div class="calc-scale"><span>5 min</span><span>150 min</span></div>
+      <div class="calc-result">
+        <div>
+          <div class="calc-price-label">AUDIO EDIT</div>
+          <div class="calc-price" id="calcPrice">$135</div>
+        </div>
+        <a class="solid" href="#order" id="calcCta" data-plan="single">BOOK THIS EPISODE →</a>
+      </div>
+      <p class="calc-note">$3 / minute of raw audio, $30 minimum per episode. Episodes over 150 minutes are quoted individually.</p>
+    </div>
+
+    <div class="price-grid" style="margin-top:34px">
+      <article class="price featured"><div class="popular">MOST POPULAR</div><div class="plan">CREATOR</div><h3>$486 <small>/ month</small></h3><p>For creators publishing consistently (~45 min episodes).</p><ul><li>4 episodes / month</li><li>10% bundle discount</li><li>Priority queue</li><li>Minor revisions</li></ul><a class="solid" href="#order" data-plan="creator">CHOOSE CREATOR</a></article>
+      <article class="price"><div class="plan">PRO</div><h3>$972 <small>/ month</small></h3><p>For higher-volume shows and teams (~45 min episodes).</p><ul><li>8 episodes / month</li><li>10% bundle discount</li><li>Priority processing</li><li>Minor revisions</li></ul><a class="outline" href="#order" data-plan="pro">CHOOSE PRO</a></article>
     </div>
   </div>
 </section>
@@ -169,7 +186,7 @@
 <section class="about section" id="about">
   <div class="container about-grid">
     <div class="about-art">
-      <img src="assets/touch-logo-founder.png" alt="Touch founder-inspired logo artwork">
+      <img src="assets/touch-logo.png" alt="Touch Sound logo">
     </div>
     <div>
       <div class="eyebrow">ABOUT TOUCH</div>
@@ -204,7 +221,7 @@
 <section class="contact section" id="contact">
   <div class="container contact-inner">
     <div><div class="eyebrow">TOUCH SOUND</div><h2>Better audio.<br><span>Higher impact.</span></h2></div>
-    <a class="primary" href="mailto:ch.houssein@gmail.com?subject=Touch%20Sound%20Project">EMAIL TOUCH →</a>
+    <a class="primary" href="mailto:contact@touchsound.online?subject=Touch%20Sound%20Project">EMAIL TOUCH →</a>
   </div>
 </section>
 </main>
