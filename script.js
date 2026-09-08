@@ -1,4 +1,3 @@
-
 const menu=document.getElementById('menu');
 const nav=document.getElementById('navLinks');
 const plan=document.getElementById('plan');
@@ -7,7 +6,7 @@ const files=document.getElementById('files');
 const fileNames=document.getElementById('fileNames');
 const status=document.getElementById('status');
 
-const TOUCH_EMAIL='ch.houssein@gmail.com';
+const TOUCH_EMAIL='contact@touchsound.online';
 const PAYPAL_LINKS={
   single:'https://paypal.me/ElHousseinChouikhat/40USD',
   creator:'https://paypal.me/ElHousseinChouikhat/150USD',
@@ -60,6 +59,24 @@ form?.addEventListener('submit',(e)=>{
     status.textContent='Ready for launch. Add your real email and PayPal links in script.js.';
   }
 });
+
+const RATE_PER_MINUTE=3;
+const MINIMUM_PRICE=30;
+const calcSlider=document.getElementById('calcSlider');
+const calcMinutes=document.getElementById('calcMinutes');
+const calcPrice=document.getElementById('calcPrice');
+const calcCta=document.getElementById('calcCta');
+
+function updateCalc(){
+  if(!calcSlider) return;
+  const minutes=parseInt(calcSlider.value,10);
+  const price=Math.max(minutes*RATE_PER_MINUTE, MINIMUM_PRICE);
+  calcMinutes.textContent=minutes;
+  calcPrice.textContent='$'+price;
+  if(calcCta) calcCta.setAttribute('data-price', price);
+}
+calcSlider?.addEventListener('input', updateCalc);
+updateCalc();
 
 const sampleForm=document.getElementById('sampleForm');
 const sampleStatus=document.getElementById('sampleStatus');
