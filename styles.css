@@ -133,3 +133,24 @@ body.gate{background:#070707;height:100svh;overflow:hidden}
   .gate-foot{position:static;background:#070707;flex-direction:column;gap:12px}.gate-foot a{margin:0 18px 0 0}
   .gate-split.is-leaving .door{flex:none}
 }
+
+/* Home doors: photo backgrounds (the photo zooms inside a clipping frame, so the podcast door can still let its badge overflow) */
+.door-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.door-bg::before,.door-bg::after{content:"";position:absolute;inset:0}
+.door-bg::before{background-size:cover;background-repeat:no-repeat;transform:scale(1.02);transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+.door-podcast .door-bg::before{background-image:url("assets/door-podcast.jpg");background-image:image-set(url("assets/door-podcast.webp") type("image/webp"),url("assets/door-podcast.jpg") type("image/jpeg"));background-position:62% center}
+.door-podcast .door-bg::after{background:linear-gradient(180deg,rgba(7,7,7,.55) 0%,rgba(7,7,7,.1) 30%,rgba(7,7,7,.55) 52%,rgba(7,7,7,.94) 78%),linear-gradient(90deg,rgba(7,7,7,.7) 0%,rgba(7,7,7,0) 70%)}
+.door-ai{background:#070707;color:#fff}
+.door-ai .door-bg::before{background-image:url("assets/door-ai.jpg");background-image:image-set(url("assets/door-ai.webp") type("image/webp"),url("assets/door-ai.jpg") type("image/jpeg"));background-position:0% center}
+.door-ai .door-bg::after{background:linear-gradient(180deg,rgba(7,7,7,.5) 0%,rgba(7,7,7,.15) 28%,rgba(7,7,7,.6) 50%,rgba(7,7,7,.95) 76%),linear-gradient(90deg,rgba(7,7,7,.75) 0%,rgba(7,7,7,0) 72%)}
+.door.is-hot .door-bg::before,.door:focus-visible .door-bg::before{transform:scale(1.08)}
+.door-ai .door-index{color:#aaa}.door-ai p{color:#c9c9c9}
+.door-ai .door-new{background:var(--lime);color:#0a0a0a}
+.door-ai h2 em{background:none;color:var(--lime)}
+.door-ai .door-meta li::before{color:var(--lime)}
+.door-ai .door-cta{background:transparent;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)}.door-ai .door-cta b{color:var(--lime)}
+.door-ai.is-hot .door-cta,.door-ai:focus-visible .door-cta{box-shadow:none}
+.door-ai .film{background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1)}
+.door-wave{opacity:.75}
+.gate-mail{color:#fff}.gate-foot a{color:#9b9b9b}.gate-foot a:hover{color:#fff}
+@media(prefers-reduced-motion:reduce){.door-bg::before{transition:none}}
