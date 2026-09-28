@@ -53,8 +53,11 @@
       const dirty = Math.min(1.25, 0.25 + 0.75 * noise(i, tick) * (0.4 + env) + (noise(i + 7, tick) > 0.93 ? 0.6 : 0));
       const tidy = 0.06 + 0.94 * env;
       const a = mix(dirty, tidy, clean) * amp;
-      const lime = clean > 0.02 && env > 0.35;
-      ctx.fillStyle = lime ? `rgba(217,255,47,${(0.25 + 0.75 * clean).toFixed(3)})` : `rgba(160,160,160,${mix(0.38, 0.22, clean).toFixed(3)})`;
+      // podcast palette: loud parts amber, quiet parts turquoise once clean; beige noise before
+      const a2 = (0.25 + 0.75 * clean).toFixed(3);
+      ctx.fillStyle = clean > 0.02 && env > 0.35 ? `rgba(243,179,68,${a2})`
+        : clean > 0.02 ? `rgba(86,200,192,${(0.18 + 0.5 * clean).toFixed(3)})`
+        : `rgba(232,216,200,${mix(0.32, 0.2, clean).toFixed(3)})`;
       ctx.fillRect(i * gap, mid - a, gap * 0.45, a * 2);
     }
     if (!reduce) requestAnimationFrame(draw);
