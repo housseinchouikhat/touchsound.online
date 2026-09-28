@@ -19,9 +19,7 @@
       <span class="brand-word">TOUCH<span>.</span><small>SOUND</small></span>
     </a>
     <nav id="navLinks">
-      <a href="index.html#difference">Samples</a>
-      <a href="index.html#try-it">Free Test</a>
-      <a href="index.html#services">Services</a>
+      <a href="index.html#difference">Podcast</a>
       <a href="ai-video.html" aria-current="page">AI Video</a>
       <a href="index.html#pricing">Pricing</a>
       <a href="index.html#about">About</a>
@@ -39,13 +37,13 @@
     <h1>Your AI made the picture.<br><span>We make it sound real.</span></h1>
     <p>Send us the video you generated. A Touch sound designer builds its ambience, sound effects and music by hand, then mixes it ready to publish.</p>
     <div class="hero-actions">
-      <a class="primary" href="#brief">Start my project <span>→</span></a>
-      <a class="ghost" href="#how">How it works</a>
+      <a class="primary" href="#brief" data-request="test">Try it free on 5 seconds <span>→</span></a>
+      <a class="ghost" href="#brief" data-request="quote">Get a quote</a>
     </div>
     <div class="hero-points">
       <div><b>✓</b> Human sound designers</div>
       <div><b>✓</b> Mixed for your platform</div>
-      <div><b>✓</b> No sound knowledge needed</div>
+      <div><b>✓</b> Not happy? We redo it</div>
     </div>
   </div>
 </section>
@@ -111,6 +109,10 @@
         <a class="outline" href="#brief" data-package="cinematic">Choose Cinematic</a>
       </article>
     </div>
+    <div class="aiv-offers">
+      <div><b>Free 5-second test</b><span>Send your video: we sound-design its first 5 seconds for free, so you hear the difference before you pay.</span><a href="#brief" data-request="test">Try it free →</a></div>
+      <div><b>Not happy? We redo it.</b><span>If the sound isn't what you imagined, tell us what to change and we redo it once, free, on every package.</span></div>
+    </div>
     <p class="aiv-note">Is your AI video narrated by a synthetic voice? Add our voice enhancement, the same treatment we give podcasts.</p>
   </div>
 </section>
@@ -127,11 +129,15 @@
     <div>
       <div class="eyebrow">Start a project</div>
       <h2>Tell us about<br><span>your video.</span></h2>
-      <p>Fill in the brief. We'll reply by email with your quote, delivery date and a payment link. Nothing is charged until you accept.</p>
+      <p>Ask for a free 5-second test, or a quote for the whole video. We reply by email; nothing is charged until you accept a quote.</p>
       <div class="secure-box"><b>Not sure what to pick?</b><span>Leave “Choose for me” everywhere. Our sound designer will decide from the picture.</span></div>
     </div>
     <form class="form" id="aiVideoForm">
       <div class="row"><label>Full name<input name="name" required placeholder="Your name" autocomplete="name"></label><label>Email<input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label></div>
+      <fieldset class="aiv-chips aiv-request"><legend>What would you like?</legend>
+        <label><input type="radio" name="request" value="test" checked><span>Free 5-second test</span></label>
+        <label><input type="radio" name="request" value="quote"><span>Full project quote</span></label>
+      </fieldset>
       <label>Link to your video<input name="videoUrl" type="url" required placeholder="https://drive.google.com/…"></label>
       <small class="aiv-help">Google Drive, Dropbox or WeTransfer. Make sure the link can be opened by anyone who has it.</small>
       <div class="row">
@@ -156,7 +162,7 @@
       <label>Reference (optional)<input name="reference" type="url" placeholder="A video or song whose sound you like"></label>
       <label>Anything else?<textarea name="notes" rows="3" placeholder="Deadline, the story, what should stand out…"></textarea></label>
       <label class="aiv-consent"><input type="checkbox" name="rights" value="yes" required><span>I own this video or have the rights to use it, and I agree to the <a href="terms.html">Terms</a>.</span></label>
-      <div class="submit-row"><div><b>Free quote</b><span>Reply by email. Nothing is charged until you accept.</span></div><button class="solid" type="submit">Request my quote</button></div>
+      <div class="submit-row"><div><b id="aivSubmitTitle">100% free</b><span id="aivSubmitNote">Your 5-second test arrives by email. No card required.</span></div><button class="solid" type="submit" id="aivSubmit">Get my free test</button></div>
       <p id="aivStatus" class="status" role="status"></p>
     </form>
   </div>

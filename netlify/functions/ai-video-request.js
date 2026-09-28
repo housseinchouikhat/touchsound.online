@@ -25,6 +25,7 @@ exports.handler = async (event) => {
     const { name, email, videoUrl, length, platform, voice, reference, notes, rights } = body;
     const mood = Array.isArray(body.mood) ? body.mood.slice(0, 10) : [];
     const pack = PACKAGES[body.package] || PACKAGES.choose;
+    const isTest = body.request === 'test';
 
     if (!name || !email || !videoUrl || !length || rights !== 'yes') {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing name, email, video link, length or rights confirmation' }) };
@@ -45,6 +46,7 @@ exports.handler = async (event) => {
     }
 
     const rows = [
+      ['Request', isTest ? '<b>Free 5-second test</b>' : 'Full project quote'],
       ['Name', escapeHtml(name)],
       ['Email', escapeHtml(email)],
       ['Video', `<a href="${escapeHtml(videoUrl)}">${escapeHtml(videoUrl)}</a>`],
@@ -68,8 +70,8 @@ exports.handler = async (event) => {
         from: RESEND_FROM,
         to: 'contact@touchsound.online',
         reply_to: email,
-        subject: `New AI video sound design brief from ${String(name).slice(0, 80)}`,
-        html: `<p>New Sound for AI Video brief on touchsound.online. Reply to this email to send the quote.</p>
+        subject: `${isTest ? 'Free 5-second AI video test' : 'New AI video sound design brief'} from ${String(name).slice(0, 80)}`,
+        html: `<p>New Sound for AI Video ${isTest ? 'free 5-second test request' : 'brief'} on touchsound.online. Reply to this email to ${isTest ? 'send the test' : 'send the quote'}.</p>
                <table cellpadding="4">${rows.map(([k, v]) => `<tr><td><b>${k}</b></td><td>${v}</td></tr>`).join('')}</table>
                <p>The creator confirmed they own the video or have the rights to use it.</p>`,
       }),
@@ -91,8 +93,12 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         from: RESEND_FROM,
         to: email,
-        subject: 'We got your video brief — Touch Sound',
-        html: `<p>Hi ${escapeHtml(name)},</p>
+        subject: isTest ? 'We got your video — your free test is on its way' : 'We got your video brief — Touch Sound',
+        html: isTest
+          ? `<p>Hi ${escapeHtml(name)},</p>
+               <p>Thanks for trying Sound for AI Video! One of our sound designers will sound-design the first 5 seconds of your video by hand and email you the result, free.</p>
+               <p>If you like it, reply to that email and we'll quote the whole video.</p>`
+          : `<p>Hi ${escapeHtml(name)},</p>
                <p>Thanks for your Sound for AI Video brief! One of our sound designers will watch your video and email you a quote with the delivery date and a payment link.</p>
                <p>Nothing is charged until you accept the quote.</p>
                <p>— Touch Sound</p>`,
