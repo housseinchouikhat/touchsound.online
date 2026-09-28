@@ -64,3 +64,4 @@ nav a[aria-current="page"]{color:var(--lime)}
 @media(max-width:930px){.ai-teaser-grid{grid-template-columns:1fr;gap:40px}.aiv-layers{grid-template-columns:1fr 1fr}.aiv-steps{grid-template-columns:1fr 1fr}.aiv-pack-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.ai-teaser-layers,.aiv-layers,.aiv-steps{grid-template-columns:1fr}.aiv-hero{padding:150px 0 80px}}
 #aiVideoForm .solid{background:#111;color:#fff;border-color:#111}#aiVideoForm .solid:hover{background:var(--lime);border-color:var(--lime);color:#111}#aiVideoForm .solid:disabled{opacity:.6}
+.aiv-podcast{background:#0b0b0b;color:#fff;padding:56px 0}.aiv-podcast-inner{display:flex;align-items:center;justify-content:space-between;gap:30px;flex-wrap:wrap}.aiv-podcast h3{font-size:1.6rem;margin:0 0 8px}.aiv-podcast p{color:#aaa;margin:0;max-width:560px}.aiv-podcast-actions{display:flex;gap:12px;flex-wrap:wrap}.aiv-podcast .ghost:hover{border-color:var(--lime);color:var(--lime)}
