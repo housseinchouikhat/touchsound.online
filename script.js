@@ -1,3 +1,5 @@
+// Accent colours come from the page's palette (CSS custom properties), so the 3D pieces match it.
+const THEME=(name,fallback)=>((getComputedStyle(document.body).getPropertyValue(name)||'').trim()||fallback);
 const menu=document.getElementById('menu');
 const nav=document.getElementById('navLinks');
 const plan=document.getElementById('plan');
@@ -22,7 +24,7 @@ menu?.addEventListener('click',()=>{
   nav.style.position=open?'absolute':'';
   nav.style.right=open?'4vw':'';
   nav.style.top=open?'76px':'';
-  nav.style.background=open?'#080808':'';
+  nav.style.background=open?THEME('--bg1','#080808'):'';
   nav.style.padding=open?'20px':'';
   nav.style.border=open?'1px solid #333':'';
   nav.style.borderRadius=open?'15px':'';
@@ -102,7 +104,7 @@ const sampleStatus=document.getElementById('sampleStatus');
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  var CRETE = '#d9ff2f';   // crest color — Touch Sound lime
+  var CRETE = THEME('--lime','#d9ff2f');   // crest color — Touch Sound lime
   var CREUX = '#3a3d45';   // trough color — dark neutral
 
   var host = document.getElementById('ts-waveform-3d');
@@ -248,7 +250,7 @@ sampleForm?.addEventListener('submit',async(e)=>{
     const json=await res.json().catch(()=>({}));
     if(res.ok && json.success){
       sampleStatus.textContent='Got it! We\'ll email you your cleaned sample within 24 hours.';
-      sampleStatus.style.color='#d9ff2f';
+      sampleStatus.style.color=THEME('--lime','#d9ff2f');
       sampleForm.reset();
       document.getElementById('fileNames')?.textContent;
     } else {
@@ -265,7 +267,7 @@ sampleForm?.addEventListener('submit',async(e)=>{
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  var ACCENT = '#d9ff2f';   // Touch Sound lime — fader/LED accent
+  var ACCENT = THEME('--lime','#d9ff2f');   // Touch Sound lime — fader/LED accent
   var PLAQUE = '#1a1b1f';
   var METAL  = '#8d9099';
 
@@ -429,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  var ACCENT = '#d9ff2f';   // anneau lime autour des écouteurs
+  var ACCENT = THEME('--lime','#d9ff2f');   // anneau lime autour des écouteurs
   var CORPS  = '#1c1d22';
   var METAL  = '#8d9099';
 
@@ -557,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
 
   var BULLE_G = '#7c5cff';
-  var BULLE_D = '#d9ff2f';   // bulle de droite — lime Touch Sound
+  var BULLE_D = THEME('--lime','#d9ff2f');   // bulle de droite — lime Touch Sound
   var MUR     = '#2a2b30';
   var BOIS    = '#6b4a28';
 
@@ -856,8 +858,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  var ACCENT = '#d9ff2f';        // bague du micro, piste 1 — lime Touch Sound
-  var ACCENT2 = '#c9862f';       // piste 2 — ambre Touch Sound
+  var ACCENT = THEME('--lime','#d9ff2f');        // bague du micro, piste 1 — lime Touch Sound
+  var ACCENT2 = THEME('--accent2','#c9862f');       // piste 2 — ambre Touch Sound
   var BOIS = '#5a3d22';
   var TITRE_ECRAN = 'Touch Sound';
 
