@@ -5,7 +5,7 @@ Sources: this repo (`index.html`, `styles.css`, `assets/`, `audio/`), owner answ
 
 ## Owner choices (standing: reuse for every film unless they say otherwise)
 - Where films play: Instagram Reel 9:16 (1080x1920). Usual length: 20 s. Language: English. Audience: podcasters, interview shows, YouTube creators.
-- Music: generated punchy electronic bed (`synth.py --style punchy`), 124 BPM, A dorian, with the real before/after samples from `audio/` mixed in.
+- Music: the owner's own track for the promo (`touch-promo`); for short Reels a generated punchy electronic bed (`synth.py --style punchy`), 124 BPM, A dorian, with the real before/after samples from `audio/` mixed in.
 - Tone: confident, direct. Message: "Human engineered. No presets."
 - The loop in three statements: Your raw audio. A real engineer, by hand. Podcast-ready.
 - Ending: logo tile, TOUCH. wordmark with the lime dot, "Your voice. Our expertise.", touchsound.online.
@@ -19,7 +19,8 @@ Sources: this repo (`index.html`, `styles.css`, `assets/`, `audio/`), owner answ
 ## Films
 | Film | Type | Date | Owner's reaction, what changed |
 |---|---|---|---|
-| `touch-reel` | promo + explainer, Reel 20 s | 2026-09-28 | first cut |
+| `touch-reel` | promo + explainer, Reel 20 s | 2026-09-28 | delivered; muted copy used as the podcast hero background |
+| `touch-promo` | explainer of both services, Reel 9:16, 62.6 s, calm | 2026-09-28 | owner's own track; two palettes (podcast warm / AI night blue) |
 
 ## Assets on file
 | Asset | Path | Notes |
@@ -45,3 +46,8 @@ Sources: this repo (`index.html`, `styles.css`, `assets/`, `audio/`), owner answ
 | lime | #d9ff2f | the highlight, the "No presets" flood |
 | ink | #121212 | headlines on paper |
 | grey | #6c6c6c | second headline line, raw waveform |
+
+## Palettes (since the two-door site, 2026-09-28)
+- Podcast: brown #1F140E-#352115, amber #F3B344 / #D4903A, turquoise #56C8C0, beige #E8D8C8. Photo: `assets/door-podcast.jpg`.
+- AI video: night blue #0D131C-#141D2B, neon cyan #00D2FF / #4DEEEA, violet #8A2BE2 / #A124DB, gold #E69A44, blue-grey #E0E6ED. Photo: `assets/door-ai.jpg` (shows Pro Tools / Avid marks: consider a clean version).
+- Owner notes: "don't use too much black"; each service keeps its own palette everywhere.

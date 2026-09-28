@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Touch Sound — how it works</title>
+    <!-- Vendored runtimes: nothing loads from the network at render time. -->
+    <script src="vendor/gsap.min.js"></script>
+    <script src="kit/film.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/fx.js"></script>
+    <script src="kit/debug.js"></script>
+    <script src="cues.js"></script>
+    <style>
+      /* touchsound.online fonts */
+      @font-face { font-family: "Space Grotesk"; src: url("assets/fonts/space-grotesk-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Space Grotesk"; src: url("assets/fonts/space-grotesk-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Inter"; src: url("assets/fonts/inter-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Inter"; src: url("assets/fonts/inter-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Fraunces"; src: url("assets/fonts/fraunces-latin-500-italic.woff2") format("woff2"); font-weight: 500; font-style: italic; font-display: block; }
+      /* Palettes (the site's): podcast = warm studio, AI video = night blue */
+      :root {
+        --b1: #1F140E; --b2: #2A1B12; --b3: #352115; --amber: #F3B344; --amber2: #D4903A; --teal: #56C8C0; --beige: #E8D8C8; --pmuted: #B9A594;
+        --n1: #0D131C; --n2: #141D2B; --n3: #1B2638; --cyan: #00D2FF; --cyan2: #4DEEEA; --violet: #A124DB; --violet2: #8A2BE2; --gold: #E69A44; --grey: #E0E6ED; --amuted: #9AA8B8;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #1F140E; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #1F140E; color: var(--beige); font-family: Inter, sans-serif; }
+      .full { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; }
+      .scene { visibility: hidden; }
+      .abs { position: absolute; }
+      .eyebrow { position: absolute; left: 90px; top: 300px; font: 700 26px/1 "Space Grotesk", sans-serif; letter-spacing: .22em; text-transform: uppercase; }
+      .head { position: absolute; left: 90px; right: 90px; top: 370px; font: 700 104px/0.98 "Space Grotesk", sans-serif; letter-spacing: -.045em; }
+      .head em { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; letter-spacing: -.02em; }
+      .head .step { display: inline-block; font: 700 30px/1 "Space Grotesk", sans-serif; letter-spacing: .14em; vertical-align: top; margin: 22px 18px 0 0; padding: 12px 16px; border-radius: 999px; }
+      .serif { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; }
+      .pill { display: inline-flex; align-items: center; gap: 14px; border-radius: 999px; padding: 18px 28px; font: 600 34px/1 Inter, sans-serif; }
+
+      /* 01 opening */
+      #s1 { background: linear-gradient(180deg, #1F140E 0%, #2A1B12 40%, #141D2B 62%, #0D131C 100%); }
+      #s1 .glowA { position: absolute; inset: 0; background: radial-gradient(ellipse 700px 520px at 30% 22%, rgba(243,179,68,.28), transparent 70%); }
+      #s1 .glowB { position: absolute; inset: 0; background: radial-gradient(ellipse 760px 560px at 72% 82%, rgba(161,36,219,.30), transparent 70%), radial-gradient(ellipse 600px 420px at 30% 92%, rgba(0,210,255,.18), transparent 70%); }
+      .tile { position: absolute; width: 260px; height: 278px; border-radius: 48px; overflow: hidden; border: 4px solid var(--amber); background: #0D131C; box-shadow: 0 0 0 6px rgba(13,19,28,.9), 0 0 70px -10px rgba(0,210,255,.55); }
+      .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .mark { position: absolute; left: 0; right: 0; text-align: center; font: 700 220px/1 "Space Grotesk", sans-serif; letter-spacing: .02em; color: var(--beige); }
+      .mark span { background: linear-gradient(180deg, var(--amber), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .sound { position: absolute; left: 0; right: 0; text-align: center; font: 500 34px/1 "Space Grotesk", sans-serif; letter-spacing: .6em; text-indent: .6em; color: var(--pmuted); }
+      .line { position: absolute; left: 0; right: 0; text-align: center; }
+      .grad { background: linear-gradient(90deg, var(--amber), var(--gold) 30%, var(--cyan2) 65%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+      /* 02 / 05 the site's two doors, mobile layout */
+      .doors { position: absolute; inset: 0; }
+      .door { position: absolute; left: 0; width: 1080px; overflow: hidden; }
+      .door .ph { position: absolute; inset: -40px; background-size: cover; }
+      .door.pod { top: 0; height: 960px; }
+      .door.pod .ph { background-image: url("assets/images/door-podcast.jpg"); background-position: 62% center; }
+      .door.pod .ov { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(31,20,14,.55) 0%, rgba(31,20,14,.1) 30%, rgba(31,20,14,.6) 55%, rgba(31,20,14,.95) 90%), linear-gradient(90deg, rgba(31,20,14,.7), rgba(31,20,14,0) 75%); }
+      .door.ai { top: 960px; height: 960px; }
+      .door.ai .ph { background-image: url("assets/images/door-ai.jpg"); background-position: 0% center; }
+      .door.ai .ov { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,19,28,.55) 0%, rgba(13,19,28,.2) 25%, rgba(13,19,28,.65) 55%, rgba(13,19,28,.96) 88%), linear-gradient(90deg, rgba(13,19,28,.72), rgba(13,19,28,0) 75%); }
+      .door .txt { position: absolute; left: 90px; right: 90px; }
+      .door .idx { font: 700 24px/1 "Space Grotesk", sans-serif; letter-spacing: .22em; text-transform: uppercase; margin-bottom: 22px; }
+      .door h2 { font: 700 100px/.94 "Space Grotesk", sans-serif; letter-spacing: -.05em; }
+      .door h2 em { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; letter-spacing: -.02em; }
+      .door .meta { margin-top: 26px; font: 600 28px/1 Inter, sans-serif; display: flex; gap: 30px; }
+      .door.pod .txt { top: 470px; color: var(--beige); } .door.pod .idx { color: var(--pmuted); } .door.pod h2 em { color: var(--amber); } .door.pod .meta b { color: var(--amber); }
+      .door.ai .txt { top: 250px; color: var(--grey); } .door.ai .idx { color: var(--amuted); } .door.ai h2 em { background: linear-gradient(90deg, var(--cyan), var(--cyan2) 40%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .06em; } .door.ai .meta b { color: var(--cyan); }
+      .door canvas { position: absolute; left: 0; top: 60px; width: 1080px; height: 380px; }
+      .badge { position: absolute; left: 430px; top: 850px; width: 220px; height: 220px; border-radius: 50%; background: linear-gradient(180deg, #1F140E 50%, #0D131C 50%); border: 2px solid rgba(232,216,200,.25); }
+      .badge svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .badge text { fill: #E8D8C8; font: 700 13px "Space Grotesk", sans-serif; letter-spacing: 3.4px; }
+      .badge img { position: absolute; left: 62px; top: 60px; width: 96px; height: 102px; object-fit: cover; border-radius: 22px; border: 3px solid var(--amber); box-shadow: 0 0 22px -4px var(--cyan); }
+      .tap { position: absolute; width: 40px; height: 40px; border-radius: 50%; border: 4px solid var(--amber); }
+      .capPill { position: absolute; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 900px; text-align: center; line-height: 1.2 !important; top: 270px; background: rgba(31,20,14,.78); border: 2px solid rgba(232,216,200,.25); color: var(--beige); padding: 20px 34px; border-radius: 999px; font: 700 40px/1 "Space Grotesk", sans-serif; letter-spacing: -.01em; }
+      .capPill b { color: var(--amber); }
+
+      /* 03 podcast */
+      #s3 { background: radial-gradient(ellipse 800px 600px at 80% 18%, rgba(243,179,68,.22), transparent 65%), radial-gradient(ellipse 700px 500px at 10% 92%, rgba(86,200,192,.14), transparent 65%), linear-gradient(170deg, #352115 0%, #1F140E 70%); color: var(--beige); }
+      #s3 .eyebrow { color: var(--amber); }
+      #s3 .head em { color: var(--amber); }
+      #s3 .step { background: var(--amber); color: var(--b1); }
+      #s3 canvas.wave { position: absolute; left: 0; top: 760px; width: 1080px; height: 500px; }
+      .tag { position: absolute; padding: 14px 24px; border-radius: 999px; font: 600 32px/1 Inter, sans-serif; border: 2px solid rgba(232,216,200,.45); background: rgba(31,20,14,.75); color: var(--beige); }
+      .tag::before { content: "✕"; color: #e07a5f; margin-right: 12px; }
+      .card { position: absolute; left: 90px; width: 900px; border-radius: 36px; }
+      #upload { top: 780px; height: 420px; background: rgba(42,27,18,.9); border: 2px solid rgba(232,216,200,.14); padding: 42px; }
+      #upload .drop { height: 190px; border: 3px dashed rgba(232,216,200,.35); border-radius: 24px; display: flex; align-items: center; gap: 30px; padding: 0 36px; }
+      #upload .ico { width: 110px; height: 110px; border-radius: 28px; background: rgba(243,179,68,.14); display: grid; place-items: center; }
+      #upload .fname { font: 700 44px/1.1 "Space Grotesk", sans-serif; color: var(--beige); }
+      #upload .fmeta { font: 500 28px/1.3 Inter, sans-serif; color: var(--pmuted); margin-top: 8px; }
+      #upload .bar { margin-top: 44px; height: 18px; border-radius: 99px; background: rgba(232,216,200,.12); overflow: hidden; }
+      #upload .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--amber2), var(--amber)); border-radius: 99px; }
+      #upload .pct { margin-top: 20px; display: flex; justify-content: space-between; font: 600 30px/1 Inter, sans-serif; color: var(--pmuted); }
+      #upload .ok { color: var(--teal); }
+      #engineer { top: 1290px; height: 150px; display: flex; align-items: center; gap: 28px; }
+      #engineer img { width: 130px; height: 140px; border-radius: 30px; border: 3px solid var(--amber); object-fit: cover; }
+      #engineer b { display: block; font: 700 40px/1.1 "Space Grotesk", sans-serif; color: var(--beige); }
+      #engineer span { display: block; font: 500 28px/1.3 Inter, sans-serif; color: var(--pmuted); margin-top: 6px; }
+      #ready { position: absolute; right: 90px; top: 700px; background: var(--teal); color: var(--b1); }
+      #podOffer { position: absolute; left: 90px; top: 1290px; display: flex; flex-direction: column; gap: 22px; }
+      #podOffer .pill { background: rgba(232,216,200,.1); border: 2px solid rgba(232,216,200,.3); color: var(--beige); }
+      #podOffer .pill b { color: var(--amber); }
+      .steps { position: absolute; left: 90px; right: 90px; top: 1440px; display: flex; gap: 14px; }
+      .steps span { flex: 1; text-align: center; padding: 14px 0; border-radius: 999px; font: 700 24px/1 "Space Grotesk", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      #s3 .steps span { border: 2px solid rgba(232,216,200,.2); color: var(--pmuted); }
+      #s3 .steps span.on { background: var(--amber); border-color: var(--amber); color: var(--b1); }
+      #switch { position: absolute; left: 0; right: 0; margin: 0 auto; width: max-content; top: 1000px; display: flex; zoom: 1.35; gap: 6px; padding: 10px; border-radius: 999px; background: rgba(232,216,200,.08); border: 2px solid rgba(232,216,200,.2); }
+      #switch span { display: flex; align-items: center; gap: 14px; padding: 22px 36px; border-radius: 999px; font: 700 38px/1 Inter, sans-serif; color: var(--pmuted); }
+      #switch i { width: 14px; height: 14px; border-radius: 50%; background: currentColor; }
+
+      /* 04 AI video */
+      #s4 { background: radial-gradient(ellipse 820px 600px at 85% 16%, rgba(161,36,219,.32), transparent 65%), radial-gradient(ellipse 720px 520px at 12% 95%, rgba(0,210,255,.18), transparent 65%), linear-gradient(170deg, #141D2B 0%, #0D131C 70%); color: var(--grey); }
+      #s4 .eyebrow { color: var(--cyan); }
+      #s4 .head em { background: linear-gradient(90deg, var(--cyan), var(--cyan2) 40%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .06em; }
+      #s4 .step { background: linear-gradient(90deg, var(--cyan), var(--violet)); color: #fff; }
+      .film { position: absolute; left: 70px; top: 740px; width: 940px; height: 529px; border-radius: 30px; overflow: hidden; border: 2px solid rgba(0,210,255,.25); background: #0D131C; }
+      .film .img { position: absolute; inset: 0; background: url("assets/images/door-ai.jpg") 30% center / cover; }
+      .film .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,19,28,.55), rgba(13,19,28,0) 30%, rgba(13,19,28,.1) 60%, rgba(13,19,28,.92)); }
+      .film .top { position: absolute; left: 28px; right: 28px; top: 24px; display: flex; justify-content: space-between; font: 700 24px/1 "Space Grotesk", sans-serif; letter-spacing: .16em; color: #9AA8B8; }
+      .film .rec::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: currentColor; margin-right: 12px; vertical-align: 0; }
+      .film .bars { position: absolute; left: 28px; right: 28px; bottom: 28px; height: 110px; display: flex; align-items: center; gap: 5px; }
+      .film .bars span { flex: 1; border-radius: 3px; background: #2C3A4F; height: 4%; }
+      #silent { position: absolute; left: 0; right: 0; top: 1320px; text-align: center; font-size: 64px; color: var(--amuted); }
+      .layer { position: absolute; left: 90px; width: 900px; height: 140px; border-radius: 28px; background: rgba(20,29,43,.9); border: 2px solid rgba(224,230,237,.1); display: flex; align-items: center; padding: 0 32px; gap: 26px; }
+      .layer .n { font: 700 24px/1 "Space Grotesk", sans-serif; letter-spacing: .14em; color: var(--violet); width: 48px; }
+      .layer b { display: block; font: 700 44px/1.05 "Space Grotesk", sans-serif; color: var(--grey); }
+      .layer small { display: block; font: 500 26px/1.3 Inter, sans-serif; color: var(--amuted); margin-top: 6px; }
+      .layer .mini { margin-left: auto; display: flex; align-items: center; gap: 5px; height: 80px; width: 190px; }
+      .layer .mini span { flex: 1; border-radius: 3px; background: #2C3A4F; height: 8%; }
+      #linkBox { top: 760px; }
+      .field label { display: block; font: 700 28px/1 Inter, sans-serif; color: var(--amuted); margin-bottom: 16px; }
+      .field .in { height: 110px; border-radius: 24px; background: rgba(244,247,250,.06); border: 2px solid rgba(0,210,255,.35); padding: 0 32px; display: flex; align-items: center; font: 500 38px/1 Inter, sans-serif; color: var(--grey); white-space: nowrap; overflow: hidden; }
+      #chips { top: 1010px; display: flex; flex-wrap: wrap; gap: 18px; }
+      #chips span { padding: 20px 30px; border-radius: 999px; border: 2px solid rgba(224,230,237,.25); font: 600 34px/1 Inter, sans-serif; color: var(--grey); }
+      #chips span.on { background: linear-gradient(90deg, var(--cyan), var(--violet)); border-color: transparent; color: #fff; }
+      .offer { position: absolute; left: 90px; width: 900px; border-radius: 32px; padding: 40px 44px; background: linear-gradient(140deg, #141D2B, #1B2638); border: 2px solid rgba(0,210,255,.2); }
+      .offer b { display: block; font: 700 58px/1.05 "Space Grotesk", sans-serif; background: linear-gradient(90deg, var(--cyan), var(--cyan2) 50%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .offer span { display: block; margin-top: 14px; font: 500 32px/1.35 Inter, sans-serif; color: var(--amuted); }
+      #aiQuote { position: absolute; left: 90px; top: 1300px; font: 500 32px/1.3 Inter, sans-serif; color: var(--grey); }
+      #s4 .steps span { border: 2px solid rgba(224,230,237,.2); color: var(--amuted); }
+      #s4 .steps span.on { background: linear-gradient(90deg, var(--cyan), var(--violet)); border-color: transparent; color: #fff; }
+
+      /* 06 lockup */
+      #s6 { background: linear-gradient(180deg, #1F140E 0%, #2A1B12 38%, #141D2B 64%, #0D131C 100%); }
+      #s6 .glowA { position: absolute; inset: 0; background: radial-gradient(ellipse 700px 520px at 50% 30%, rgba(243,179,68,.25), transparent 70%); }
+      #s6 .glowB { position: absolute; inset: 0; background: radial-gradient(ellipse 800px 520px at 50% 78%, rgba(161,36,219,.26), transparent 70%), radial-gradient(ellipse 600px 400px at 25% 90%, rgba(0,210,255,.16), transparent 70%); }
+      #url { position: absolute; left: 0; right: 0; margin: 0 auto; width: max-content; top: 1350px; background: var(--beige); color: #1F140E; font: 700 44px/1 "Space Grotesk", sans-serif; padding: 22px 40px; border-radius: 999px; white-space: nowrap; }
+      #services { position: absolute; left: 0; right: 0; top: 1460px; text-align: center; font: 600 28px/1 Inter, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      #services b { color: var(--amber); font-weight: 600; } #services i { color: var(--cyan); font-style: normal; } #services em { color: var(--pmuted); font-style: normal; margin: 0 16px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="62.6" data-width="1080" data-height="1920">
+      <!-- 01 opening -->
+      <section id="s1" class="full scene">
+        <div class="glowA"></div><div class="glowB"></div>
+        <div class="tile" id="s1tile" style="left:410px;top:430px"><img src="assets/images/touch-logo.png" alt="" /></div>
+        <div class="mark" id="s1mark" style="top:760px">TOUCH<span>.</span></div>
+        <div class="sound" id="s1sound" style="top:1026px">SOUND</div>
+        <div class="line serif" id="s1a" style="top:1110px;font-size:104px;color:var(--beige)">One studio.</div>
+        <div class="line" id="s1b" style="top:1240px;font:700 76px/1.05 'Space Grotesk',sans-serif;letter-spacing:-.03em;color:var(--beige)"><span class="grad">Two ways</span> to sound great.</div>
+      </section>
+
+      <!-- 02 the home page (mobile layout of the site's two doors) -->
+      <section id="s2" class="full scene"></section>
+
+      <!-- 03 podcast -->
+      <section id="s3" class="full scene">
+        <div class="eyebrow">01 — Podcast &amp; voice</div>
+        <div class="head" id="p1">You recorded<br />a <em>podcast.</em></div>
+        <div class="head" id="p2"><span class="step">01</span>Send your<br /><em>recording.</em></div>
+        <div class="head" id="p3"><span class="step">02</span>A real engineer<br />cleans it. <em>By hand.</em></div>
+        <div class="head" id="p4"><span class="step">03</span>Get it back<br /><em>podcast-ready.</em></div>
+        <div class="head" id="p5">Made an<br /><em>AI video</em> instead?</div>
+        <canvas class="wave" id="pwave" width="1080" height="500" data-layout-allow-overflow></canvas>
+        <div class="tag" id="tag1" style="left:110px;top:800px">Hiss</div>
+        <div class="tag" id="tag2" style="left:560px;top:870px">Room echo</div>
+        <div class="tag" id="tag3" style="left:230px;top:1180px">Uneven levels</div>
+        <div class="card" id="upload">
+          <div class="drop">
+            <div class="ico"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#F3B344" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></svg></div>
+            <div><div class="fname">episode-12.wav</div><div class="fmeta">45 min · 2 tracks · raw</div></div>
+          </div>
+          <div class="bar"><div class="fill" id="ufill"></div></div>
+          <div class="pct"><span id="ulabel">Uploading…</span><span id="upct">0%</span></div>
+        </div>
+        <div class="card" id="engineer"><img src="assets/images/touch-logo.png" alt="" /><div><b>A human engineer</b><span>Noise, voice, levels. No presets.</span></div></div>
+        <div class="pill" id="ready">Podcast-ready ✓</div>
+        <div id="podOffer"><div class="pill"><b>From $3</b> per minute of audio</div><div class="pill"><b>Free</b> 10-second test</div></div>
+        <div class="steps" id="psteps"><span>Send</span><span>Clean</span><span>Receive</span></div>
+        <div id="switch"><span id="swP"><i></i>Podcast</span><span id="swA"><i></i>AI Video</span></div>
+      </section>
+
+      <!-- 04 AI video -->
+      <section id="s4" class="full scene">
+        <div class="eyebrow">02 — AI video</div>
+        <div class="head" id="a1">You generated<br />a <em>video.</em></div>
+        <div class="head" id="a2">We add<br /><em>four layers.</em></div>
+        <div class="head" id="a3"><span class="step">01</span>Share<br />your <em>link.</em></div>
+        <div class="head" id="a4"><span class="step">02</span>Pick<br />a <em>vibe.</em></div>
+        <div class="head" id="a5"><span class="step">03</span>Get<br />your <em>sound.</em></div>
+        <div class="head" id="a6">Try it<br /><em>free.</em></div>
+        <div class="film" id="film"><div class="img" id="filmImg" data-layout-allow-overflow></div><div class="shade"></div><div class="top"><span class="rec" id="filmRec">REC</span><span id="filmState">SOUND OFF</span></div><div class="bars" id="filmBars"></div></div>
+        <div id="silent" class="serif">…but it's silent.</div>
+        <div id="layers"></div>
+        <div class="card field" id="linkBox"><label>Link to your video</label><div class="in" id="linkIn"></div></div>
+        <div class="card" id="chips"><span>Cinematic</span><span>Epic</span><span>Dreamy</span><span>Dark</span><span>Playful</span><span>Sci-fi</span><span>Emotional</span></div>
+        <div class="offer" id="off1" style="top:760px"><b>Free 5-second test</b><span>Send your video: we sound-design its first 5 seconds, free.</span></div>
+        <div class="offer" id="off2" style="top:1030px"><b>Not happy? We redo it.</b><span>Tell us what to change. Once, free, on every package.</span></div>
+        <div id="aiQuote">Then a personal quote for the whole video.</div>
+        <div class="steps" id="asteps"><span>Share</span><span>Vibe</span><span>Sound</span></div>
+      </section>
+
+      <!-- 05 both doors -->
+      <section id="s5" class="full scene"></section>
+
+      <!-- 06 lockup -->
+      <section id="s6" class="full scene">
+        <div class="glowA"></div><div class="glowB"></div>
+        <div class="tile" id="s6tile" style="left:410px;top:420px"><img src="assets/images/touch-logo.png" alt="" /></div>
+        <div class="mark" id="s6mark" style="top:760px">TOUCH<span>.</span></div>
+        <div class="sound" id="s6sound" style="top:1022px">SOUND</div>
+        <div class="line serif" id="s6a" style="top:1092px;font-size:100px;color:var(--beige)">Your voice.</div>
+        <div class="line serif" id="s6b" style="top:1200px;font-size:100px"><span class="grad">Our expertise.</span></div>
+        <div id="url">touchsound.online</div>
+        <div id="services"><b>Podcast audio</b><em>·</em><i>Sound for AI video</i></div>
+      </section>
+
+      <canvas id="grain" class="full" width="540" height="960" data-layout-ignore style="width:100%;height:100%"></canvas>
+      <!-- pf:audio -->
+      <audio id="pf-music" data-timeline-role="music" src="assets/audio/licensed/song.wav" data-start="0" data-duration="62.6" data-track-index="20" data-volume="1"></audio>
+      <!-- /pf:audio -->
+    </div>
+    <script>
+      const b = PF.grid(CUES.grid);
+      const $ = PF.$;
+      const W = CUES.width, H = CUES.height;
+      const E = { out: PF.bezier(0.16, 1, 0.3, 1), inout: PF.bezier(0.65, 0, 0.35, 1), soft: PF.bezier(0.33, 0, 0.2, 1) };
+      const bar = (n) => b(n, 1);
+      let S = {};
+
+      /* ---------- small pure helpers ---------- */
+      // opacity of something shown in [a, end), fading in over fi and out over fo
+      const win = (t, a, end, fi = 0.5, fo = 0.4) => (t < a || t >= end ? 0 : Math.min(E.out(PF.clamp01((t - a) / fi)), PF.clamp01((end - t) / fo)));
+      // a calm entrance: fade + rise, and a gentle exit
+      function show(el, t, a, end, { dy = 36, fi = 0.6, fo = 0.4, blur = 0 } = {}) {
+        const o = win(t, a, end, fi, fo);
+        const u = E.out(PF.clamp01((t - a) / fi));
+        PF.css(el, { visibility: o > 0.001 ? "inherit" : "hidden", opacity: o.toFixed(3), transform: `translateY(${((1 - u) * dy).toFixed(2)}px)`, filter: blur && u < 1 ? `blur(${((1 - u) * blur).toFixed(2)}px)` : "none" });
+        return o;
+      }
+      function scene(el, t, a, end, fi = 0.5, fo = 0.5) {
+        const o = win(t, a, end, fi, fo);
+        PF.css(el, { visibility: o > 0.001 ? "inherit" : "hidden", opacity: o.toFixed(3) });
+        return o;
+      }
+      const noise = (i, k) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
+
+      // the site's podcast waveform: noisy beige -> clean amber/turquoise (same drawing as the home page)
+      function wave(canvas, t, clean, { mid = 0.5, amp = 0.36, gap = 12, head = -1 } = {}) {
+        const ctx = canvas.getContext("2d"), w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const n = Math.floor(w / gap), tick = Math.floor(t * 14);
+        for (let i = 0; i < n; i++) {
+          const u = i / n;
+          const env = Math.pow(Math.abs(Math.sin(u * 9 - t * 0.7) * Math.sin(u * 3.3 + t * 0.43 + 1)), 0.8);
+          const dirty = Math.min(1.25, 0.25 + 0.75 * noise(i, tick) * (0.4 + env) + (noise(i + 7, tick) > 0.93 ? 0.6 : 0));
+          const tidy = 0.06 + 0.94 * env;
+          const a = PF.lerp(dirty, tidy, clean) * amp * h;
+          const played = head >= 0 && u < head;
+          ctx.fillStyle = clean > 0.02 && env > 0.35 ? `rgba(243,179,68,${(0.3 + 0.7 * clean) * (head >= 0 && !played ? 0.45 : 1)})`
+            : clean > 0.02 ? `rgba(86,200,192,${(0.2 + 0.55 * clean) * (head >= 0 && !played ? 0.5 : 1)})`
+            : `rgba(232,216,200,${PF.lerp(0.4, 0.22, clean)})`;
+          ctx.fillRect(i * gap, mid * h - a, gap * 0.5, a * 2);
+        }
+        if (head >= 0) { ctx.fillStyle = "#E8D8C8"; ctx.fillRect(head * w - 2, h * 0.06, 4, h * 0.88); }
+      }
+
+      /* ---------- the site's two doors (built twice: scene 02 and scene 05) ---------- */
+      function makeDoors(parent) {
+        const root = document.createElement("div");
+        root.className = "doors";
+        root.innerHTML = `
+          <div class="door pod"><div class="ph" data-layout-allow-overflow></div><div class="ov"></div><canvas width="1080" height="380" data-layout-allow-overflow></canvas>
+            <div class="txt"><div class="idx">01 — Podcast &amp; voice</div><h2><em>Clean</em><br>my podcast.</h2><div class="meta"><span><b>✓</b> From $3 / min</span><span><b>✓</b> Free 10-s test</span></div></div></div>
+          <div class="door ai"><div class="ph" data-layout-allow-overflow></div><div class="ov"></div>
+            <div class="txt"><div class="idx">02 — AI video</div><h2>Sound design<br>my <em>AI video.</em></h2><div class="meta"><span><b>✓</b> Free 5-s test</span><span><b>✓</b> Quote per video</span></div></div></div>
+          <div class="badge"><svg viewBox="0 0 200 200"><defs><path id="bc${parent.id}" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><text><textPath href="#bc${parent.id}">CHOOSE YOUR SOUND · CHOOSE YOUR SOUND · </textPath></text></svg><img src="assets/images/touch-logo.png" alt=""></div>
+          <div class="tap"></div>
+          <div class="capPill"></div>`;
+        parent.appendChild(root);
+        const q = (s) => root.querySelector(s);
+        return { root, pod: q(".door.pod"), ai: q(".door.ai"), podPh: q(".door.pod .ph"), aiPh: q(".door.ai .ph"), podTxt: q(".door.pod .txt"), aiTxt: q(".door.ai .txt"), canvas: q(".door.pod canvas"), badge: q(".badge"), svg: q(".badge svg"), tap: q(".tap"), cap: q(".capPill") };
+      }
+
+      function setup() {
+        S.d2 = makeDoors($("#s2"));
+        S.d2.cap.innerHTML = "Choose your <b>sound.</b>";
+        S.d5 = makeDoors($("#s5"));
+        S.d5.cap.innerHTML = "Two services.<br><b>One team of real engineers.</b>";
+        S.d5.cap.style.fontSize = "38px";
+        S.d5.cap.style.borderRadius = "36px";
+        // film bars
+        const fb = $("#filmBars");
+        for (let i = 0; i < 56; i++) { const s = document.createElement("span"); fb.appendChild(s); }
+        S.filmBars = PF.$$("#filmBars span");
+        // four layers
+        const L = [["Ambience", "The world around the picture"], ["Sound effects", "Every action gets its sound"], ["Music", "The emotion and the rhythm"], ["Mix", "Ready for TikTok, YouTube or ads"]];
+        const lw = $("#layers");
+        L.forEach(([name, desc], i) => {
+          const el = document.createElement("div");
+          el.className = "layer";
+          el.style.top = 720 + i * 158 + "px";
+          el.innerHTML = `<span class="n">0${i + 1}</span><div><b>${name}</b><small>${desc}</small></div><div class="mini">${"<span></span>".repeat(14)}</div>`;
+          lw.appendChild(el);
+        });
+        S.layers = PF.$$("#layers .layer");
+        S.chips = PF.$$("#chips span");
+        S.psteps = PF.$$("#psteps span");
+        S.asteps = PF.$$("#asteps span");
+        PF.debug({ grid: b, safe: CUES.safe });
+      }
+
+      /* ---------- draw: every style from t ---------- */
+      function drawDoors(d, t, t0, { tapAt = null, openAt = null, capAt = null, capEnd = Infinity } = {}) {
+        // doors slide in from their sides
+        const inP = E.out(PF.clamp01((t - t0) / 0.9)), inA = E.out(PF.clamp01((t - t0 - 0.25) / 0.9));
+        const open = openAt === null ? 0 : E.inout(PF.clamp01((t - openAt) / (b.beat * 2)));
+        PF.css(d.pod, { transform: `translateX(${((1 - inP) * -120).toFixed(1)}px)`, opacity: inP.toFixed(3), height: (960 + open * 960).toFixed(1) + "px" });
+        PF.css(d.ai, { transform: `translate(${((1 - inA) * 120).toFixed(1)}px, ${(open * 960).toFixed(1)}px)`, opacity: inA.toFixed(3) });
+        PF.css(d.podPh, { transform: `scale(${(1.04 + 0.05 * PF.clamp01((t - t0) / 8)).toFixed(4)})` });
+        PF.css(d.aiPh, { transform: `scale(${(1.04 + 0.05 * PF.clamp01((t - t0) / 8)).toFixed(4)})` });
+        PF.css(d.podTxt, { opacity: (1 - open).toFixed(3) });
+        PF.css(d.badge, { opacity: (inA * (1 - open)).toFixed(3), transform: `translateY(${(open * 480).toFixed(1)}px) scale(${(0.7 + 0.3 * E.out(PF.clamp01((t - t0 - 0.4) / 0.8))).toFixed(4)})` });
+        PF.css(d.svg, { transform: `rotate(${((t - t0) * 16).toFixed(2)}deg)` });
+        // the podcast door's waveform: clean while "hovered" (after the tap)
+        const clean = tapAt === null ? 0.5 + 0.5 * Math.sin((t - t0) * 1.6) : E.soft(PF.clamp01((t - tapAt) / 0.8));
+        wave(d.canvas, t, PF.clamp01(clean), { mid: 0.55, amp: 0.3 });
+        // tap ripple
+        if (tapAt !== null && t >= tapAt && t < tapAt + 0.9) {
+          const u = (t - tapAt) / 0.9;
+          PF.css(d.tap, { visibility: "inherit", left: 540 - 20 + "px", top: 660 - 20 + "px", transform: `scale(${(1 + u * 5).toFixed(3)})`, opacity: (1 - u).toFixed(3) });
+        } else PF.css(d.tap, { visibility: "hidden" });
+        if (capAt !== null) show(d.cap, t, capAt, capEnd, { dy: 20 });
+        else PF.css(d.cap, { visibility: "hidden" });
+      }
+
+      function draw(t) {
+        /* 01 opening (bars 1-4) */
+        if (scene($("#s1"), t, 0, bar(5) + 0.4, 0.001, 0.5)) {
+          const land = PF.step(t - 0.05, { stiffness: 140, damping: 15 });
+          PF.css($("#s1tile"), { opacity: PF.clamp01((t - 0.05) * 3).toFixed(3), transform: `scale(${PF.lerp(0.7, 1, land).toFixed(4)})` });
+          show($("#s1mark"), t, b(1, 3), bar(6), { dy: 30, fi: 0.8 });
+          show($("#s1sound"), t, bar(2), bar(6), { dy: 10, fi: 0.8 });
+          show($("#s1a"), t, bar(3), bar(6), { dy: 40, fi: 0.8, blur: 8 });
+          show($("#s1b"), t, b(3, 3), bar(6), { dy: 40, fi: 0.8, blur: 8 });
+          PF.css($("#s1 .glowA"), { opacity: (0.4 + 0.6 * E.soft(PF.clamp01((t - bar(4)) / 1.5))).toFixed(3) });
+          PF.css($("#s1 .glowB"), { opacity: (0.2 + 0.8 * E.soft(PF.clamp01((t - bar(4)) / 1.8))).toFixed(3) });
+        }
+
+        /* 02 the home page (bars 5-8), opening the podcast door on the drop */
+        if (scene($("#s2"), t, bar(5), bar(9) + 0.6, 0.6, 0.6)) {
+          drawDoors(S.d2, t, bar(5), { tapAt: bar(8), openAt: b(8, 3), capAt: bar(7), capEnd: b(8, 3) });
+        }
+
+        /* 03 podcast (bars 9-16) */
+        if (scene($("#s3"), t, bar(9), bar(17) + 0.2, 0.6, 0.2)) {
+          show($(".eyebrow", $("#s3")), t, bar(9), bar(17) + 1, { dy: 12 });
+          show($("#p1"), t, bar(9), bar(11));
+          show($("#p2"), t, bar(11), bar(13));
+          show($("#p3"), t, bar(13), bar(15));
+          show($("#p4"), t, bar(15), bar(16));
+          show($("#p5"), t, bar(16), bar(17), { fo: 0.25 });
+          // waveform: noisy (A), hidden during upload (B), cleaning (C), clean + playhead (D)
+          const wo = Math.max(win(t, bar(9) + 0.2, bar(11), 0.6, 0.35), win(t, bar(13), bar(16), 0.5, 0.4));
+          PF.css($("#pwave"), { visibility: wo > 0 ? "inherit" : "hidden", opacity: wo.toFixed(3) });
+          if (wo > 0) {
+            const clean = t < bar(13) ? 0 : E.soft(PF.clamp01((t - b(13, 2)) / (b.bar * 0.9)));
+            const head = t >= bar(15) ? PF.clamp01((t - bar(15)) / (b.bar * 1.5)) : -1;
+            wave($("#pwave"), t, clean, { mid: 0.5, amp: 0.34, head });
+          }
+          show($("#tag1"), t, b(9, 3), bar(11), { dy: 16 });
+          show($("#tag2"), t, bar(10), bar(11), { dy: 16 });
+          show($("#tag3"), t, b(10, 3), bar(11), { dy: 16 });
+          // upload card
+          show($("#upload"), t, bar(11), bar(13), { dy: 50 });
+          const up = E.inout(PF.clamp01((t - b(11, 2)) / (b(12, 3) - b(11, 2))));
+          PF.css($("#ufill"), { width: (up * 100).toFixed(2) + "%" });
+          $("#upct").textContent = Math.round(up * 100) + "%";
+          const done = t >= b(12, 3);
+          $("#ulabel").textContent = done ? "Uploaded ✓" : "Uploading…";
+          PF.css($("#ulabel"), { color: done ? "#56C8C0" : "" });
+          show($("#engineer"), t, b(13, 3), bar(15), { dy: 24 });
+          show($("#ready"), t, b(15, 2), bar(16), { dy: 16 });
+          show($("#podOffer"), t, b(15, 3), bar(16), { dy: 24 });
+          // steps indicator
+          const ps = show($("#psteps"), t, bar(11), b(15, 3), { dy: 16 });
+          if (ps) S.psteps.forEach((s, i) => s.classList.toggle("on", t >= bar(11 + i * 2)));
+          // the service switch flips to AI Video on the break, then a blue wipe opens from it
+          show($("#switch"), t, bar(16), bar(17), { dy: 30, fi: 0.5, fo: 0.2 });
+          const flip = t >= b(16, 4);
+          PF.css($("#swP"), { background: flip ? "transparent" : "#F3B344", color: flip ? "#B9A594" : "#1F140E" });
+          PF.css($("#swA"), { background: flip ? "#00D2FF" : "transparent", color: flip ? "#0D131C" : "#B9A594" });
+        }
+
+        /* 04 AI video (bars 17-26): revealed by a circle from the switch */
+        const s4 = $("#s4");
+        if (t >= b(16, 4, 0.25) && t < bar(27) + 0.6) {
+          const r = E.inout(PF.clamp01((t - b(16, 4, 0.25)) / (bar(17) + 0.15 - b(16, 4, 0.25))));
+          PF.css(s4, { visibility: "inherit", opacity: win(t, 0, bar(27) + 0.6, 0.001, 0.6).toFixed(3), clipPath: r >= 1 ? "none" : `circle(${(r * 2000).toFixed(1)}px at 700px 1410px)` });
+          show($(".eyebrow", s4), t, bar(17), bar(27), { dy: 12 });
+          show($("#a1"), t, bar(17), bar(19));
+          show($("#a2"), t, bar(19), bar(21));
+          show($("#a3"), t, bar(21), bar(22));
+          show($("#a4"), t, bar(22), bar(23));
+          show($("#a5"), t, bar(23), bar(25));
+          show($("#a6"), t, bar(25), bar(27));
+          // the film frame: silent (A), then sound on (D)
+          const fo = Math.max(win(t, bar(17) + 0.2, bar(19), 0.6, 0.4), win(t, bar(23), bar(25), 0.5, 0.4));
+          PF.css($("#film"), { visibility: fo > 0 ? "inherit" : "hidden", opacity: fo.toFixed(3), transform: `translateY(${((1 - E.out(PF.clamp01((t - (t < bar(21) ? bar(17) : bar(23))) / 0.7))) * 40).toFixed(1)}px)` });
+          if (fo > 0) {
+            const on = t >= bar(23);
+            PF.css($("#filmImg"), { transform: `scale(${(1.05 + 0.06 * PF.clamp01((t - bar(17)) / 12) + (on ? 0.04 * E.out(PF.clamp01((t - bar(24)) / 1.2)) : 0)).toFixed(4)})` });
+            $("#filmState").textContent = on ? "SOUND ON" : "SOUND OFF";
+            PF.css($("#filmState"), { color: on ? "#00D2FF" : "#9AA8B8" });
+            PF.css($("#filmRec"), { color: on ? "#00D2FF" : "#9AA8B8" });
+            const rise = on ? E.out(PF.clamp01((t - bar(23)) / 0.8)) : 0;
+            S.filmBars.forEach((s, i) => {
+              const u = i / (S.filmBars.length - 1);
+              const shape = 0.3 + 0.7 * Math.abs(Math.sin(u * 7.3 + 0.6)) * (0.55 + 0.45 * Math.sin(u * 2.1 + 1.2));
+              const pulse = 0.6 + 0.4 * Math.abs(Math.sin(t * 5.2 + i * 0.37));
+              PF.css(s, { height: (4 + rise * shape * pulse * 92).toFixed(1) + "%", background: rise > 0.02 ? `linear-gradient(to top, #A124DB, #00D2FF)` : "#2C3A4F" });
+            });
+          }
+          show($("#silent"), t, bar(18), bar(19), { dy: 20 });
+          // four layers light up, one every two beats
+          const lo = show($("#layers"), t, bar(19), bar(21), { dy: 30 });
+          if (lo) S.layers.forEach((el, i) => {
+            const at = b(19, 1 + i * 2);
+            const u = E.out(PF.clamp01((t - at) / 0.5));
+            PF.css(el, { opacity: (0.35 + 0.65 * u).toFixed(3), transform: `translateX(${((1 - u) * 30).toFixed(1)}px)`, borderColor: u > 0.5 ? "rgba(0,210,255,.45)" : "rgba(224,230,237,.1)" });
+            el.querySelectorAll(".mini span").forEach((s, k) => {
+              const h = u * (0.3 + 0.7 * Math.abs(Math.sin(t * 4 + k * 0.7 + i))) * 100;
+              PF.css(s, { height: Math.max(8, h).toFixed(1) + "%", background: u > 0.05 ? "linear-gradient(to top,#A124DB,#00D2FF)" : "#2C3A4F" });
+            });
+          });
+          // share your link (typing) and pick a vibe (chips)
+          show($("#linkBox"), t, bar(21), bar(23), { dy: 30 });
+          const url = "drive.google.com/…/ai-clip.mp4";
+          const n = Math.floor(PF.clamp01((t - b(21, 2)) / (b.beat * 2.2)) * url.length);
+          const caret = t < b(22, 1) && Math.floor(t * 4) % 2 === 0 ? "|" : "";
+          $("#linkIn").textContent = url.slice(0, n) + caret;
+          show($("#chips"), t, bar(22), bar(23), { dy: 30 });
+          S.chips.forEach((c, i) => c.classList.toggle("on", (i === 0 && t >= b(22, 3)) || (i === 5 && t >= b(22, 4))));
+          // offers
+          show($("#off1"), t, bar(25), bar(27), { dy: 36 });
+          show($("#off2"), t, b(25, 3), bar(27), { dy: 36 });
+          show($("#aiQuote"), t, bar(26), bar(27), { dy: 20 });
+          const as = show($("#asteps"), t, bar(21), bar(25), { dy: 16 });
+          if (as) S.asteps.forEach((s, i) => s.classList.toggle("on", t >= [bar(21), bar(22), bar(23)][i]));
+        } else PF.css(s4, { visibility: "hidden" });
+
+        /* 05 both doors again (bars 27-28) */
+        if (scene($("#s5"), t, bar(27), bar(29) + 0.5, 0.6, 0.6)) {
+          drawDoors(S.d5, t, bar(27), { capAt: bar(28), capEnd: bar(29) + 0.5 });
+        }
+
+        /* 06 lockup (bars 29-32) */
+        if (scene($("#s6"), t, bar(29), 999, 0.7, 0.001)) {
+          const land = PF.step(t - bar(29), { stiffness: 140, damping: 15 });
+          PF.css($("#s6tile"), { transform: `scale(${PF.lerp(0.75, 1, land).toFixed(4)})` });
+          show($("#s6mark"), t, b(29, 2), 999, { dy: 30, fi: 0.8 });
+          show($("#s6sound"), t, b(29, 3), 999, { dy: 10, fi: 0.8 });
+          show($("#s6a"), t, b(29, 3), 999, { dy: 36, fi: 0.8, blur: 8 });
+          show($("#s6b"), t, bar(30), 999, { dy: 36, fi: 0.8, blur: 8 });
+          show($("#url"), t, b(30, 3), 999, { dy: 24, fi: 0.7 });
+          show($("#services"), t, bar(31), 999, { dy: 16, fi: 0.8 });
+          PF.css($("#s6 .glowB"), { opacity: (0.5 + 0.5 * Math.sin((t - bar(29)) * 0.8)).toFixed(3) });
+        }
+
+        PF.grain($("#grain"), t, { alpha: 0.04 });
+      }
+
+      PF.film({
+        duration: CUES.duration,
+        setup,
+        draw,
+        waitFor: [PF.loadImages({ logo: "assets/images/touch-logo.png", pod: "assets/images/door-podcast.jpg", ai: "assets/images/door-ai.jpg" })],
+        // Registered only after setup and the clock are built (fonts first).
+        register: (tl) => {
+          window.__timelines["main"] = tl;
+        },
+      });
+    </script>
+  </body>
+</html>
