@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Touch Sound Reel</title>
+    <!-- Vendored runtimes: nothing loads from the network at render time. -->
+    <script src="vendor/gsap.min.js"></script>
+    <script src="kit/film.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/words.js"></script>
+    <script src="kit/draw.js"></script>
+    <script src="kit/fx.js"></script>
+    <script src="kit/three.js"></script>
+    <script src="kit/debug.js"></script>
+    <script src="cues.js"></script>
+    <script src="data/env.js"></script>
+    <style>
+      /* touchsound.online fonts (styles.css): Space Grotesk for headings, Inter for body, Fraunces italic for the hero line. */
+      @font-face { font-family: "Space Grotesk"; src: url("assets/fonts/space-grotesk-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Space Grotesk"; src: url("assets/fonts/space-grotesk-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Inter"; src: url("assets/fonts/inter-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Inter"; src: url("assets/fonts/inter-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Fraunces"; src: url("assets/fonts/fraunces-latin-500-italic.woff2") format("woff2"); font-weight: 500; font-style: italic; font-display: block; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #070707; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #070707; color: #fff; font-family: Inter, sans-serif; }
+      .full { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; }
+      #cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .head { position: absolute; left: 0; right: 0; text-align: center; font-family: "Space Grotesk", sans-serif; font-weight: 700; text-transform: uppercase; line-height: 0.9; letter-spacing: -0.045em; white-space: nowrap; visibility: hidden; }
+      .serif { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; text-transform: none; letter-spacing: -0.02em; }
+      .band { position: absolute; left: 0; width: 1080px; background: #f1f1ec; transform: scaleX(0); }
+      #lockup { visibility: hidden; }
+      #tile { position: absolute; left: 420px; top: 470px; width: 240px; height: 257px; border: 3px solid #d9ff2f; border-radius: 40px; overflow: hidden; background: #070707; }
+      #tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      #mark { position: absolute; left: 0; right: 0; top: 800px; text-align: center; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 230px; line-height: 1; letter-spacing: 0.02em; color: #fff; white-space: nowrap; }
+      #mark span { color: #d9ff2f; }
+      #sound { position: absolute; left: 0; right: 0; top: 1062px; text-align: center; font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 34px; letter-spacing: 0.6em; text-indent: 0.6em; color: #aaaaaa; }
+      #tag1, #tag2 { position: absolute; left: 0; right: 0; text-align: center; font-family: "Fraunces", serif; font-style: italic; font-weight: 500; font-size: 104px; line-height: 1; letter-spacing: -0.02em; }
+      #tag1 { top: 1160px; color: #fff; }
+      #tag2 { top: 1270px; color: #d9ff2f; }
+      #url { position: absolute; left: 0; right: 0; top: 1415px; text-align: center; font-family: Inter, sans-serif; font-weight: 500; font-size: 40px; letter-spacing: 0.04em; color: #9b9b9b; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="19.3548" data-width="1080" data-height="1920">
+      <!-- Layers, bottom to top: [camera wrapper: 3D canvas > words] > transition wipes > vignette and grain > HUD. -->
+      <div id="cam">
+        <canvas id="three" data-layout-allow-overflow width="1080" height="1920" class="full"></canvas>
+        <div id="words" class="full">
+          <div id="a1" class="head" data-layout-allow-overlap style="top:300px;font-size:300px;color:#ffffff">Raw</div>
+          <div id="a2" class="head" data-layout-allow-overlap style="top:560px;font-size:240px;color:#969696">Audio.</div>
+          <div id="b1" class="head" data-layout-allow-overlap style="top:300px;font-size:250px;color:#121212">Human</div>
+          <div id="b2" class="head serif" data-layout-allow-overlap style="top:525px;font-size:190px;color:#6c6c6c">engineered.</div>
+          <div id="c1" class="head" data-layout-allow-overlap style="top:290px;font-size:300px;color:#070707">No</div>
+          <div id="c2" class="head" data-layout-allow-overlap style="top:545px;font-size:220px;color:#070707">Presets.</div>
+          <div id="d1" class="head" data-layout-allow-overlap style="top:290px;font-size:190px;color:#ffffff">Clean.</div>
+          <div id="d2" class="head" data-layout-allow-overlap style="top:470px;font-size:190px;color:#ffffff">Clear.</div>
+          <div id="d3" class="head" data-layout-allow-overlap style="top:650px;font-size:190px;color:#d9ff2f">Balanced.</div>
+          <div id="e1" class="head" data-layout-allow-overlap style="top:300px;font-size:300px;color:#121212">After.</div>
+          <div id="e2" class="head serif" data-layout-allow-overlap style="top:590px;font-size:140px;color:#6c6c6c">podcast-ready.</div>
+          <div id="lockup" class="full">
+            <div id="tile"><img src="assets/images/touch-logo.png" alt="Touch Sound logo" /></div>
+            <div id="mark">TOUCH<span>.</span></div>
+            <div id="sound">SOUND</div>
+            <div id="tag1">Your voice.</div>
+            <div id="tag2">Our expertise.</div>
+            <div id="url">touchsound.online</div>
+          </div>
+        </div>
+      </div>
+      <div id="wipe" class="full" data-layout-ignore style="visibility:hidden"></div>
+      <div id="blinds" class="full" data-layout-ignore style="visibility:hidden"></div>
+      <div id="vignette" class="full" data-layout-ignore></div>
+      <canvas id="grain" class="full" width="540" height="960" data-layout-ignore style="width:100%;height:100%"></canvas>
+      <div id="hud-layer" class="full" data-layout-ignore></div>
+      <!-- Three.js and add-ons are ES modules: they hand themselves to the kit, then the film starts. -->
+      <script type="importmap">
+        { "imports": { "three": "./vendor/three/three.module.min.js" } }
+      </script>
+      <script type="module">
+        import * as THREE from "three";
+        import { EffectComposer } from "./vendor/three/addons/postprocessing/EffectComposer.js";
+        import { RenderPass } from "./vendor/three/addons/postprocessing/RenderPass.js";
+        import { UnrealBloomPass } from "./vendor/three/addons/postprocessing/UnrealBloomPass.js";
+        import { OutputPass } from "./vendor/three/addons/postprocessing/OutputPass.js";
+        import { RoomEnvironment } from "./vendor/three/addons/environments/RoomEnvironment.js";
+        window.THREE = THREE;
+        window.THREE_ADDONS = { EffectComposer, RenderPass, UnrealBloomPass, OutputPass, RoomEnvironment };
+        PF.signal("three").resolve();
+      </script>
+      <!-- pf:audio -->
+      <audio id="pf-music" data-timeline-role="music" src="assets/audio/mix.wav" data-start="0" data-duration="19.3548" data-track-index="20" data-volume="1"></audio>
+      <audio id="pf-sfx-01-thud" src="assets/audio/sfx/thud.wav" data-start="0.0461" data-duration="0.4000" data-track-index="21" data-volume="0.35"></audio>
+      <audio id="pf-sfx-02-thud" src="assets/audio/sfx/thud.wav" data-start="0.9654" data-duration="0.4000" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-03-whoosh" src="assets/audio/sfx/whoosh.wav" data-start="3.3055" data-duration="0.6000" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-04-thud" src="assets/audio/sfx/thud.wav" data-start="4.8364" data-duration="0.4000" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-05-tick" src="assets/audio/sfx/tick.wav" data-start="5.8064" data-duration="0.0500" data-track-index="21" data-volume="0.25"></audio>
+      <audio id="pf-sfx-06-thud" src="assets/audio/sfx/thud.wav" data-start="8.2235" data-duration="0.4000" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-07-click" src="assets/audio/sfx/click.wav" data-start="8.7089" data-duration="0.0300" data-track-index="21" data-volume="0.25"></audio>
+      <audio id="pf-sfx-08-click" src="assets/audio/sfx/click.wav" data-start="9.1927" data-duration="0.0300" data-track-index="21" data-volume="0.25"></audio>
+      <audio id="pf-sfx-09-thud" src="assets/audio/sfx/thud.wav" data-start="9.6751" data-duration="0.4000" data-track-index="21" data-volume="0.35"></audio>
+      <audio id="pf-sfx-10-tick" src="assets/audio/sfx/tick.wav" data-start="10.1612" data-duration="0.0500" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-11-tick" src="assets/audio/sfx/tick.wav" data-start="10.6451" data-duration="0.0500" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-12-whoosh" src="assets/audio/sfx/whoosh.wav" data-start="11.0475" data-duration="0.6000" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-13-thud" src="assets/audio/sfx/thud.wav" data-start="11.6106" data-duration="0.4000" data-track-index="22" data-volume="0.3"></audio>
+      <audio id="pf-sfx-14-pop" src="assets/audio/sfx/pop.wav" data-start="13.5481" data-duration="0.0900" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-15-ping" src="assets/audio/sfx/ping.wav" data-start="16.4492" data-duration="0.9000" data-track-index="21" data-volume="0.3"></audio>
+      <audio id="pf-sfx-16-chime" src="assets/audio/sfx/chime.wav" data-start="17.4147" data-duration="1.4000" data-track-index="21" data-volume="0.25"></audio>
+      <audio id="pf-sfx-17-pop" src="assets/audio/sfx/pop.wav" data-start="18.3868" data-duration="0.0900" data-track-index="22" data-volume="0.25"></audio>
+      <!-- /pf:audio -->
+    </div>
+    <script>
+      const b = PF.grid(CUES.grid);
+      const $ = PF.$;
+      const W = CUES.width, H = CUES.height;
+      // touchsound.online tokens (styles.css :root). Lime is the one highlight.
+      const C = { black: "#070707", ink: "#121212", white: "#ffffff", grey: "#6c6c6c", mid: "#969696", paper: "#f1f1ec", line: "#d8d8d1", lime: "#d9ff2f" };
+      const V = CUES.voice;
+      const N = ENV.before.length;
+      let st, hud, S = {};
+
+      /* A row of mirrored columns (a waveform, as audio editors draw it): heights and colours set per frame. */
+      function columns(scene, n, rows, { x0 = -8, x1 = 8, size = 0.16, zGap = 0.42, material } = {}) {
+        const THREE = st.THREE;
+        const geo = new THREE.BoxGeometry(size, 1, size);
+        const mesh = new THREE.InstancedMesh(geo, material || PF.three.mat("gloss", C.white), n * rows);
+        scene.add(mesh);
+        const m = new THREE.Matrix4(), c = new THREE.Color();
+        const xs = (i) => PF.lerp(x0, x1, i / (n - 1));
+        return {
+          mesh, x: xs,
+          update(height, color) {
+            let k = 0;
+            for (let r = 0; r < rows; r++) for (let i = 0; i < n; i++, k++) {
+              const h = Math.max(0.02, height(i, r));
+              m.makeScale(1, h, 1);
+              m.setPosition(xs(i), 0, (r - (rows - 1) / 2) * zGap);
+              mesh.setMatrixAt(k, m);
+              mesh.setColorAt(k, c.set(color(i, r, h)));
+            }
+            mesh.instanceMatrix.needsUpdate = true;
+            mesh.instanceColor.needsUpdate = true;
+          },
+        };
+      }
+
+      /*
+       * The linear colour that ACES filmic tone mapping (three's shader, at the stage exposure) turns into `hex`.
+       * A plain Color background is tone-mapped by the OutputPass, which turns #f1f1ec paper into #dddddb.
+       */
+      function toneMappedTo(hex, exposure = 0.95) {
+        const THREE = st.THREE;
+        const c = new THREE.Color(hex);
+        const target = [c.r, c.g, c.b].map((v) => Math.min(0.997, v)); // Color stores linear values already
+        const IN = [[0.59719, 0.35458, 0.04823], [0.076, 0.90834, 0.01566], [0.0284, 0.13383, 0.83777]];
+        const OUT = [[1.60475, -0.53108, -0.07367], [-0.10208, 1.10813, -0.00605], [-0.00327, -0.07276, 1.07602]];
+        const mul = (M, v) => M.map((row) => row[0] * v[0] + row[1] * v[1] + row[2] * v[2]);
+        const fit = (v) => { const a = v * (v + 0.0245786) - 0.000090537, b = v * (0.983729 * v + 0.432951) + 0.238081; return a / b; };
+        const aces = (x) => mul(OUT, mul(IN, x.map((v) => (v * exposure) / 0.6)).map(fit)).map((v) => Math.min(1, Math.max(0, v)));
+        let x = target.slice();
+        for (let i = 0; i < 200; i++) {
+          const y = aces(x);
+          x = x.map((v, k) => v + (target[k] - y[k]) * 1.5); // may go negative: the composer targets are half float
+        }
+        return new THREE.Color().setRGB(x[0], x[1], x[2], THREE.LinearSRGBColorSpace);
+      }
+
+      function scene(bg, near = 7, far = 30) {
+        const THREE = st.THREE;
+        const s = st.newScene();
+        const exact = toneMappedTo(bg); // the background and fog land on the exact brand hex after tone mapping
+        s.background = exact;
+        s.fog = new THREE.Fog(exact.clone(), near, far);
+        s.environmentIntensity = 0.55;
+        PF.three.lights(st, { scene: s, ground: bg, fill: 0.5, key: 1.6, keyPos: [-4, 8, 6] });
+        return s;
+      }
+
+      /* Shrink a headline until it fits between the side margins (measured once, fonts loaded). */
+      function fit(el, max = 940) {
+        el.style.visibility = "hidden";
+        const w = PF.rectOf(el).w;
+        const inner = el.scrollWidth;
+        if (inner > max) el.style.fontSize = (parseFloat(el.style.fontSize) * max) / inner + "px";
+        return w;
+      }
+
+      function setup() {
+        const THREE = window.THREE;
+        hud = PF.hud($("#hud-layer"), { size: 22, font: "'Space Grotesk', monospace", top: CUES.safe.top - 60, bottom: CUES.safe.bottom - 60, color: "rgba(255,255,255,.75)" });
+        $("#vignette").style.background = PF.vignette(0.4, "0,0,0");
+        ["a1", "a2", "b1", "b2", "c1", "c2", "d1", "d2", "d3", "e1", "e2"].forEach((id) => { const el = $("#" + id); el.style.display = "inline-block"; el.style.left = "0"; el.style.right = "auto"; el.style.width = "auto"; fit(el); el.style.display = ""; el.style.left = ""; el.style.right = ""; el.style.width = ""; });
+
+        // blinds for the dark -> paper handoff
+        for (let i = 0; i < 8; i++) { const d = document.createElement("div"); d.className = "band"; d.style.top = i * 240 + "px"; d.style.height = "241px"; $("#blinds").appendChild(d); }
+        S.bands = PF.$$(".band");
+
+        st = PF.three.stage($("#three"), { width: W, height: H, fov: 50, env: true, bloom: { strength: 0.65, radius: 0.55, threshold: 1.3 }, exposure: 0.95 });
+
+        // 01 Before: the raw clip's real waveform, jittery, with a high noise floor.
+        S.sA = scene(C.black);
+        S.colA = columns(S.sA, N, 3, { material: PF.three.mat("satin", C.white) });
+        S.headA = new THREE.Mesh(new THREE.BoxGeometry(0.02, 5.4, 0.9), new THREE.MeshBasicMaterial({ color: C.white, transparent: true, opacity: 0.45 }));
+        S.sA.add(S.headA);
+        S.dustA = PF.three.particles(st, 500, { scene: S.sA, size: 0.05, color: (i) => (i % 3 ? C.mid : C.grey),
+          pos: (i, t, o) => { const r = PF.random(i * 13 + 1); o.x = -12 + r() * 24 + Math.sin(t * 0.7 + i) * 0.3; o.y = (r() - 0.5) * 9; o.z = (r() - 0.5) * 12 - 1; } });
+
+        // 02 The touch: the engineer's mark as a tile, a glossy ink line drawn by hand around it, the lime point at its tip.
+        S.sB = scene(C.paper, 8, 34);
+        const img = PF.img.logo;
+        const tex = PF.three.canvasTexture(st, 640, 686, (c, w, h) => {
+          c.beginPath(); c.roundRect(6, 6, w - 12, h - 12, 104); c.fillStyle = C.black; c.fill();
+          c.save(); c.clip(); c.drawImage(img, 6, 6, w - 12, h - 12); c.restore();
+          c.lineWidth = 8; c.strokeStyle = C.lime; c.stroke();
+        });
+        S.tile = PF.three.card(st, tex, 2.6);
+        S.sB.add(S.tile);
+        const loop = [];
+        for (let k = 0; k <= 160; k++) {
+          const s = k / 160, a = -Math.PI * 0.6 + s * Math.PI * 2 * 1.35;
+          const r = 2.05 + 0.18 * Math.sin(s * 23) + 0.35 * s;
+          loop.push([r * Math.cos(a) * 1.0, r * Math.sin(a) * 1.12, 0.5 * Math.sin(a * 0.5) + 0.25]);
+        }
+        S.lineB = PF.three.tube(st, loop, { radius: 0.06, segments: 900, material: PF.three.mat("gloss", C.ink), scene: S.sB });
+        S.pointB = new THREE.Mesh(new THREE.SphereGeometry(0.13, 40, 28), PF.three.mat("glow", C.lime));
+        S.sB.add(S.pointB);
+        S.dustB = PF.three.particles(st, 300, { scene: S.sB, size: 0.045, color: () => C.line,
+          pos: (i, t, o) => { const r = PF.random(i * 7 + 3); o.x = (r() - 0.5) * 12; o.y = (r() - 0.5) * 10 + Math.sin(t + i) * 0.2; o.z = -3 - r() * 6; } });
+
+        // 03 No presets: a fader bank, every fader at one preset, then each one set by hand.
+        S.sC = scene(C.lime, 40, 80); // no visible fog: the solved lime is out of gamut and would tint the console
+        S.faders = [];
+        const plate = new THREE.Mesh(new THREE.BoxGeometry(7.4, 5.6, 0.3), PF.three.mat("satin", C.ink));
+        plate.position.set(0, 0, -0.3);
+        S.sC.add(plate);
+        const HAND = [-1.3, 0.9, 0.25, 1.55, -0.45, 1.15, -0.95, 0.6];
+        for (let i = 0; i < 8; i++) {
+          const x = -2.8 + i * 0.8;
+          const slot = new THREE.Mesh(new THREE.BoxGeometry(0.1, 4.4, 0.1), new THREE.MeshBasicMaterial({ color: C.black }));
+          slot.position.set(x, 0, -0.12);
+          S.sC.add(slot);
+          const cap = new THREE.Group();
+          const body = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.34, 0.42), PF.three.mat("gloss", C.grey));
+          const mark = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.04, 0.43), new THREE.MeshBasicMaterial({ color: C.white, toneMapped: false }));
+          cap.add(body, mark);
+          cap.position.set(x, 0.2, 0.1);
+          S.sC.add(cap);
+          S.faders.push({ cap, from: 0.2, to: HAND[i] });
+        }
+
+        // 04 Clean: the same columns settle onto the cleaned clip, a lime playhead blooms.
+        S.sD = scene(C.black);
+        S.colD = columns(S.sD, N, 3, { material: PF.three.mat("satin", C.white) });
+        S.headD = new THREE.Mesh(new THREE.BoxGeometry(0.04, 6.2, 1.2), PF.three.mat("glow", C.lime));
+        S.sD.add(S.headD);
+        S.dustD = PF.three.particles(st, 500, { scene: S.sD, size: 0.05, color: (i) => (i % 4 ? C.mid : C.lime),
+          pos: (i, t, o) => { const r = PF.random(i * 31 + 5); o.x = -12 + r() * 24 - t * 0.4; o.y = (r() - 0.5) * 9; o.z = (r() - 0.5) * 12 - 1; } });
+
+        // 05 After: the cleaned clip's envelope draws itself as an ink line while it plays.
+        S.sE = scene(C.paper, 8, 34);
+        const env = (i) => { const e = ENV.after, a = e[Math.max(0, i - 1)], c = e[Math.min(N - 1, i + 1)]; return 0.12 + 2.1 * (0.25 * a + 0.5 * e[i] + 0.25 * c); };
+        const top = [];
+        for (let i = 0; i < N; i++) { const x = PF.lerp(-8, 8, i / (N - 1)); top.push([x, env(i) - 0.6, 0]); }
+        S.lineE = PF.three.tube(st, top, { radius: 0.09, segments: 1000, material: PF.three.mat("gloss", C.ink), scene: S.sE });
+        S.pointE = new THREE.Mesh(new THREE.SphereGeometry(0.16, 40, 28), PF.three.mat("glow", C.lime));
+        S.sE.add(S.pointE);
+        S.dustE = PF.three.particles(st, 300, { scene: S.sE, size: 0.045, color: () => C.line,
+          pos: (i, t, o) => { const r = PF.random(i * 5 + 9); o.x = (r() - 0.5) * 20; o.y = (r() - 0.5) * 10; o.z = -3 - r() * 6; } });
+
+        // 06 Lockup: particles converge into the wordmark, then the DOM wordmark takes over.
+        S.sF = scene(C.black);
+        // the wordmark's ink box (the element itself spans the frame)
+        const range = document.createRange();
+        range.selectNodeContents($("#mark"));
+        const rr = range.getBoundingClientRect(), root = $("#root").getBoundingClientRect(), sc = root.width / W;
+        const markBox = { x: (rr.left - root.left) / sc, y: (rr.top - root.top) / sc, w: rr.width / sc, h: rr.height / sc };
+        const markW = markBox.w;
+        const unit = H / (2 * 10 * Math.tan((25 * Math.PI) / 180)); // px per world unit at radius 10
+        const font = `700 200px "Space Grotesk"`;
+        const probe = document.createElement("canvas").getContext("2d");
+        probe.font = font;
+        const tw = probe.measureText("TOUCH.").width;
+        const fs = (200 * 1200 * 0.96) / tw;
+        const pts = PF.three.samplePoints((c, w, h) => { c.font = `700 ${fs}px "Space Grotesk"`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("TOUCH.", w / 2, h / 2); }, 1600, { w: 1200, h: 600 });
+        const scale = markW / unit / 2 / 0.96;
+        const cy = (H / 2 - (markBox.y + markBox.h / 2)) / unit;
+        S.ptsF = pts.map((p) => ({ x: p.x * scale, y: p.y * scale + cy, z: 0 }));
+        S.partF = PF.three.particles(st, S.ptsF.length, { scene: S.sF, size: 0.07, color: (i) => (i % 5 ? C.white : C.lime),
+          pos: (i, t, o) => {
+            const r = PF.random(i * 17 + 11), a = r() * Math.PI * 2, e = (r() - 0.5) * 2, d = 7 + r() * 8;
+            const u = PF.bezier(0.7, 0, 0.2, 1)(PF.progress(t, b(9, 1) + r() * 0.35, b.beat * 2 - 0.35));
+            const p = S.ptsF[i];
+            o.x = PF.lerp(Math.cos(a) * d, p.x, u); o.y = PF.lerp(e * d, p.y, u); o.z = PF.lerp(Math.sin(a) * d - 4, p.z, u);
+          } });
+
+        PF.debug({ grid: b, safe: CUES.safe });
+      }
+
+      function slam(id, t, at, until, from = 1.3) {
+        const el = $(id);
+        const on = t >= at && t < until;
+        PF.css(el, { visibility: on ? "inherit" : "hidden" });
+        if (on) PF.slamStyle(el, PF.slam(t, at, { from }));
+      }
+
+      function shots(t, list) { return PF.three.shots(st.camera, t, list); }
+
+      function draw(t) {
+        const THREE = st.THREE;
+        const bar = (n) => b(n, 1);
+        const at = t < bar(3) ? "A" : t < bar(5) ? "B" : t < bar(6) ? "C" : t < bar(7) ? "D" : t < bar(9) ? "E" : "F";
+        const dark = at === "A" || at === "D" || at === "F";
+        PF.css($("#root"), { background: { A: C.black, B: C.paper, C: C.lime, D: C.black, E: C.paper, F: C.black }[at] });
+
+        // camera shake on the big landings (the HUD does not shake)
+        const k = PF.shake(t, [bar(3), bar(5), bar(6), bar(9)], { amp: 12, decay: 0.32 });
+        PF.css($("#cam"), { transform: `translate(${k.x.toFixed(2)}px, ${k.y.toFixed(2)}px) rotate(${k.r.toFixed(3)}deg)` });
+
+        if (at === "A") {
+          st.use(S.sA);
+          const play = PF.clamp01((t - V.before) / V.length);
+          const hx = PF.lerp(-8, 8, play);
+          const tick = Math.floor(t * 16);
+          S.colA.update(
+            (i, r) => { const q = PF.random(i * 977 + r * 131 + tick * 7919); const e = ENV.before[i]; return (0.25 + 2.3 * e) * (0.6 + 0.8 * q()) + 0.5 * q(); },
+            (i, r, h) => (S.colA.x(i) < hx ? (r === 1 ? C.white : C.line) : C.grey),
+          );
+          S.headA.position.set(hx, 0, 0);
+          S.dustA.update(t);
+          shots(t, [
+            { at: 0, azimuth: -58, elevation: 6, radius: 12, target: [-2.5, 2.6, 0], drift: { azimuth: 8, radius: -1 } },
+            { at: b(1, 3), azimuth: -22, elevation: 3, radius: 10, target: [-1, 2.4, 0], drift: { azimuth: 6 } },
+            { at: b(2, 1), azimuth: 30, elevation: 14, radius: 7.5, target: [hx - 0.5, 0.8, 0], drift: { azimuth: -8 } },
+            { at: b(2, 3), azimuth: -78, elevation: -3, radius: 6.5, target: [hx, 0.2, 0], drift: { radius: -1.5 } },
+          ]);
+        } else if (at === "B") {
+          st.use(S.sB);
+          const p = PF.bezier(0.45, 0, 0.25, 1)(PF.progress(t, bar(3), b.bar * 2 - b.beat * 0.5));
+          S.lineB.draw(p);
+          const h = S.lineB.at(p);
+          S.pointB.position.set(h.x, h.y, h.z);
+          S.pointB.visible = p > 0 && p < 1;
+          const land = PF.step(t - bar(3), { stiffness: 170, damping: 16 });
+          S.tile.scale.setScalar(PF.lerp(0.6, 1, land));
+          S.tile.rotation.y = PF.lerp(0.9, 0, land) + Math.sin(t * 1.1) * 0.08;
+          S.dustB.update(t);
+          shots(t, [
+            { at: bar(3), azimuth: -18, elevation: 4, radius: 11, target: [0, 2.2, 0], drift: { azimuth: 10, radius: -0.8 } },
+            { at: b(3, 3), azimuth: 16, elevation: 8, radius: 10.5, target: [0, 2.1, 0], drift: { azimuth: -8 } },
+            { at: bar(4), azimuth: -26, elevation: 6, radius: 5.2, target: [0.2, 0.1, 0], drift: { azimuth: 10, radius: -0.4 } },
+            { at: b(4, 3), azimuth: 34, elevation: -6, radius: 6, target: [0, 0, 0], drift: { azimuth: -10 } },
+          ]);
+        } else if (at === "C") {
+          st.use(S.sC);
+          const sixteenth = b.beat / 4;
+          S.faders.forEach((f, i) => {
+            const u = PF.step(t - (b(5, 2) + i * sixteenth), { stiffness: 260, damping: 18 });
+            f.cap.position.y = PF.lerp(f.from, f.to, u);
+          });
+          shots(t, [
+            { at: bar(5), azimuth: -22, elevation: 22, radius: 10.5, target: [0, 2.2, 0], drift: { azimuth: 6, radius: -0.6 } },
+            { at: b(5, 3), azimuth: 48, elevation: 12, radius: 6.2, target: [0.4, 0.1, 0], drift: { azimuth: -10 } },
+          ]);
+        } else if (at === "D") {
+          st.use(S.sD);
+          const tick = Math.floor(t * 16);
+          const hx = PF.lerp(-9, 9, PF.bezier(0.5, 0, 0.3, 1)(PF.progress(t, bar(6), b.bar)));
+          S.colD.update(
+            (i, r) => {
+              const q = PF.random(i * 977 + r * 131 + tick * 7919);
+              const raw = (0.25 + 2.3 * ENV.before[i]) * (0.6 + 0.8 * q()) + 0.5 * q();
+              const clean = 0.1 + 2.6 * Math.pow(ENV.after[i], 1.6);
+              const u = PF.step(t - bar(6) - i * 0.006, { stiffness: 120, damping: 14 });
+              return PF.lerp(raw, clean, u);
+            },
+            (i, r, h) => (S.colD.x(i) < hx ? (h > 1.9 && r === 1 ? C.lime : C.white) : C.grey),
+          );
+          S.headD.position.set(hx, 0, 0);
+          S.dustD.update(t);
+          shots(t, [
+            { at: bar(6), azimuth: -40, elevation: 6, radius: 12, target: [0, 2.2, 0], drift: { azimuth: 8, radius: -1 } },
+            { at: b(6, 3), azimuth: 26, elevation: 8, radius: 11, target: [1, 2.8, 0], drift: { azimuth: -6 } },
+          ]);
+        } else if (at === "E") {
+          st.use(S.sE);
+          const p = PF.clamp01((t - V.after) / V.length);
+          S.lineE.draw(p);
+          const h = S.lineE.at(p);
+          S.pointE.position.set(h.x, h.y, h.z);
+          S.pointE.visible = p > 0;
+          S.dustE.update(t);
+          const head = [h.x, h.y * 0.5, 0];
+          shots(t, [
+            { at: bar(7), azimuth: -35, elevation: 4, radius: 12, target: [-5, 1.3, 0], drift: { azimuth: 6, radius: -1 } },
+            { at: b(7, 3), azimuth: 22, elevation: 6, radius: 5.5, target: head, drift: { azimuth: -6 } },
+            { at: bar(8), azimuth: -20, elevation: 2, radius: 13, target: [h.x - 1, 1.3, 0], drift: { radius: -0.6 } },
+            { at: b(8, 3), azimuth: -62, elevation: 3, radius: 14, target: [0, 1.4, 0], drift: { azimuth: 6 } },
+          ]);
+        } else {
+          st.use(S.sF);
+          S.partF.update(t);
+          S.partF.points.material.opacity = 1 - PF.progress(t, b(9, 3), 0.2);
+          shots(t, [{ at: bar(9), azimuth: 0, elevation: 0, radius: 10, target: [0, 0, 0] }]);
+        }
+        st.bloomPass.enabled = dark; // paper and lime sit above the bloom threshold once solved exact: bloom only in the dark scenes
+        st.render();
+
+        // words: slams on the beat, over wide shots only
+        slam("#a1", t, b(1, 1, 0.1), bar(2));
+        slam("#a2", t, b(1, 3), bar(2));
+        slam("#b1", t, bar(3), bar(4));
+        slam("#b2", t, b(3, 3), bar(4), 1.15);
+        slam("#c1", t, bar(5), b(5, 3), 1.5);
+        slam("#c2", t, b(5, 2), b(5, 3));
+        slam("#d1", t, bar(6), bar(7));
+        slam("#d2", t, b(6, 2), bar(7));
+        slam("#d3", t, b(6, 3), bar(7));
+        slam("#e1", t, bar(7), b(7, 3));
+        slam("#e2", t, bar(8), b(8, 3) + b.beat * 1.5, 1.15);
+
+        // lockup
+        const lockOn = t >= b(9, 3);
+        PF.show($("#lockup"), lockOn);
+        if (lockOn) {
+          PF.slamStyle($("#mark"), PF.slam(t, b(9, 3), { from: 1.25 }));
+          PF.css($("#sound"), { opacity: PF.progress(t, b(9, 3, 0.5), 0.3).toFixed(3) });
+          const tile = PF.step(t - b(9, 3), { stiffness: 200, damping: 15 });
+          PF.css($("#tile"), { transform: `translateY(${((1 - tile) * 60).toFixed(2)}px) scale(${PF.lerp(0.6, 1, tile).toFixed(4)})`, opacity: PF.clamp01(tile * 2).toFixed(3) });
+          const e1 = PF.enter(t, bar(10), { length: 0.3, offset: 30 }), e2 = PF.enter(t, b(10, 2), { length: 0.3, offset: 30 }), e3 = PF.enter(t, b(10, 3), { length: 0.3, offset: 20 });
+          [["#tag1", e1], ["#tag2", e2], ["#url", e3]].forEach(([id, e]) => PF.css($(id), { opacity: e.opacity.toFixed(3), transform: `translateY(${e.y.toFixed(2)}px)` }));
+        }
+
+        // transitions (above the words, under the HUD)
+        const wipe = $("#wipe");
+        const floodB = PF.bezier(0.7, 0, 0.2, 1)(PF.progress(t, bar(3) - 0.26, 0.26));
+        const irisC = PF.bezier(0.7, 0, 0.2, 1)(PF.progress(t, bar(5) - 0.24, 0.24));
+        const irisF = PF.bezier(0.7, 0, 0.2, 1)(PF.progress(t, bar(9) - 0.26, 0.26));
+        if (t >= bar(3) - 0.26 && t < bar(3)) { PF.show(wipe, true); PF.css(wipe, { background: C.paper }); PF.flood(wipe, Math.max(0.001, floodB), "up"); }
+        else if (t >= bar(5) - 0.24 && t < bar(5)) { PF.show(wipe, true); PF.css(wipe, { background: C.lime }); PF.iris(wipe, Math.max(0.001, irisC), W / 2, 1150, W, H); }
+        else if (t >= bar(9) - 0.26 && t < bar(9)) {
+          const v = S.pointE.position.clone().project(st.camera);
+          PF.show(wipe, true); PF.css(wipe, { background: C.black }); PF.iris(wipe, Math.max(0.001, irisF), (v.x * 0.5 + 0.5) * W, (-v.y * 0.5 + 0.5) * H, W, H);
+        } else PF.show(wipe, false);
+        const blindsOn = t >= bar(7) - 0.46 && t < bar(7);
+        PF.show($("#blinds"), blindsOn);
+        if (blindsOn) PF.blinds(S.bands, t, bar(7) - 0.46, { each: 0.2, stagger: 0.036 });
+
+        // chrome
+        PF.css($("#vignette"), { opacity: dark ? 1 : 0 });
+        const chapter = { A: "01 — Before", B: "02 — The touch", C: "03 — No presets", D: "04 — Clean", E: "05 — After", F: "06 — Touch Sound" }[at];
+        hud.color(dark ? "rgba(255,255,255,.72)" : "rgba(7,7,7,.72)");
+        hud.set({ tl: chapter, tr: "Touch.Sound", bl: "Human engineered", br: PF.timecode(t, 30) }, t);
+        PF.grain($("#grain"), t, { alpha: dark ? 0.06 : 0.03 });
+      }
+
+      PF.film({
+        duration: CUES.duration,
+        setup,
+        draw,
+        waitFor: [PF.signal("three"), PF.loadImages({ logo: "assets/images/touch-logo.png" })],
+        // Registered only after setup and the clock are built (fonts first).
+        register: (tl) => {
+          window.__timelines["main"] = tl;
+        },
+      });
+    </script>
+  </body>
+</html>
