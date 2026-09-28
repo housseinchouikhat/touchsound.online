@@ -1,0 +1,16 @@
+{
+  "bpm": 124.0,
+  "firstBeat": 0,
+  "pickupBeats": 0,
+  "beatsPerBar": 4,
+  "bars": 10,
+  "duration": 19.3548,
+  "fileDuration": 19.3548,
+  "energy": "1123331132",
+  "key": "A dorian",
+  "progression": "i VII IV i",
+  "style": "punchy",
+  "hits": "3 5 9",
+  "risers": "5",
+  "gaps": "5"
+}
