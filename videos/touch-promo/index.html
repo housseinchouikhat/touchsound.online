@@ -43,7 +43,7 @@
       .tile { position: absolute; width: 260px; height: 278px; border-radius: 48px; overflow: hidden; border: 4px solid var(--amber); background: #0D131C; box-shadow: 0 0 0 6px rgba(13,19,28,.9), 0 0 70px -10px rgba(0,210,255,.55); }
       .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
       .mark { position: absolute; left: 0; right: 0; text-align: center; font: 700 220px/1 "Space Grotesk", sans-serif; letter-spacing: .02em; color: var(--beige); }
-      .mark span { background: linear-gradient(180deg, var(--amber), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .mark .dot { background: linear-gradient(180deg, var(--amber), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
       .sound { position: absolute; left: 0; right: 0; text-align: center; font: 500 34px/1 "Space Grotesk", sans-serif; letter-spacing: .6em; text-indent: .6em; color: var(--pmuted); }
       .line { position: absolute; left: 0; right: 0; text-align: center; }
       .grad { background: linear-gradient(90deg, var(--amber), var(--gold) 30%, var(--cyan2) 65%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -140,6 +140,21 @@
       #s4 .steps span { border: 2px solid rgba(224,230,237,.2); color: var(--amuted); }
       #s4 .steps span.on { background: linear-gradient(90deg, var(--cyan), var(--violet)); border-color: transparent; color: #fff; }
 
+      /* text reveals: every word rises out of its own mask */
+      .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .08em .12em 0; margin: 0 -.08em -.12em 0; }
+      .wi { display: inline-block; transform-origin: 0 100%; }
+      .split .grad, #s4 .head.split em, .mark.split .dot { background: none !important; }
+      .split .grad .wi { background: linear-gradient(90deg, var(--amber), var(--gold) 30%, var(--cyan2) 65%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #s4 .head.split em .wi { background: linear-gradient(90deg, var(--cyan), var(--cyan2) 55%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .mark.split .dot .wi { background: linear-gradient(180deg, var(--amber), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      /* edit effects: light leaks, flashes, sweeps, the neon ring of the wipe */
+      #leak { background: radial-gradient(ellipse 620px 900px at 12% 30%, rgba(243,179,68,.55), transparent 70%), radial-gradient(ellipse 700px 900px at 92% 72%, rgba(0,210,255,.45), transparent 70%), radial-gradient(ellipse 520px 520px at 70% 18%, rgba(161,36,219,.45), transparent 70%); mix-blend-mode: screen; opacity: 0; }
+      #flash { background: #F4E9DC; opacity: 0; }
+      #streak { opacity: 0; mix-blend-mode: screen; }
+      #ring { position: absolute; border-radius: 50%; border: 10px solid #00D2FF; box-shadow: 0 0 60px 10px rgba(0,210,255,.55), inset 0 0 40px rgba(161,36,219,.5); visibility: hidden; }
+      #sweep { position: absolute; top: -200px; width: 260px; height: 2320px; background: linear-gradient(90deg, transparent, rgba(243,179,68,.9) 35%, #F4E9DC 50%, rgba(0,210,255,.9) 65%, transparent); filter: blur(18px); mix-blend-mode: screen; visibility: hidden; transform-origin: 50% 50%; }
+      #vignette { background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0,0,0,0) 60%, rgba(0,0,0,.35) 100%); }
+
       /* 06 lockup */
       #s6 { background: linear-gradient(180deg, #1F140E 0%, #2A1B12 38%, #141D2B 64%, #0D131C 100%); }
       #s6 .glowA { position: absolute; inset: 0; background: radial-gradient(ellipse 700px 520px at 50% 30%, rgba(243,179,68,.25), transparent 70%); }
@@ -155,7 +170,7 @@
       <section id="s1" class="full scene">
         <div class="glowA"></div><div class="glowB"></div>
         <div class="tile" id="s1tile" style="left:410px;top:430px"><img src="assets/images/touch-logo.png" alt="" /></div>
-        <div class="mark" id="s1mark" style="top:760px">TOUCH<span>.</span></div>
+        <div class="mark" id="s1mark" style="top:760px">TOUCH<span class="dot">.</span></div>
         <div class="sound" id="s1sound" style="top:1026px">SOUND</div>
         <div class="line serif" id="s1a" style="top:1110px;font-size:104px;color:var(--beige)">One studio.</div>
         <div class="line" id="s1b" style="top:1240px;font:700 76px/1.05 'Space Grotesk',sans-serif;letter-spacing:-.03em;color:var(--beige)"><span class="grad">Two ways</span> to sound great.</div>
@@ -218,7 +233,7 @@
       <section id="s6" class="full scene">
         <div class="glowA"></div><div class="glowB"></div>
         <div class="tile" id="s6tile" style="left:410px;top:420px"><img src="assets/images/touch-logo.png" alt="" /></div>
-        <div class="mark" id="s6mark" style="top:760px">TOUCH<span>.</span></div>
+        <div class="mark" id="s6mark" style="top:760px">TOUCH<span class="dot">.</span></div>
         <div class="sound" id="s6sound" style="top:1022px">SOUND</div>
         <div class="line serif" id="s6a" style="top:1092px;font-size:100px;color:var(--beige)">Your voice.</div>
         <div class="line serif" id="s6b" style="top:1200px;font-size:100px"><span class="grad">Our expertise.</span></div>
@@ -226,6 +241,12 @@
         <div id="services"><b>Podcast audio</b><em>·</em><i>Sound for AI video</i></div>
       </section>
 
+      <div id="vignette" class="full" data-layout-ignore></div>
+      <div id="leak" class="full" data-layout-ignore></div>
+      <div id="streak" class="full" data-layout-ignore></div>
+      <div id="ring" data-layout-ignore></div>
+      <div id="sweep" data-layout-ignore></div>
+      <div id="flash" class="full" data-layout-ignore></div>
       <canvas id="grain" class="full" width="540" height="960" data-layout-ignore style="width:100%;height:100%"></canvas>
       <!-- pf:audio -->
       <audio id="pf-music" data-timeline-role="music" src="assets/audio/licensed/song.wav" data-start="0" data-duration="62.6" data-track-index="20" data-volume="1"></audio>
@@ -249,6 +270,61 @@
         PF.css(el, { visibility: o > 0.001 ? "inherit" : "hidden", opacity: o.toFixed(3), transform: `translateY(${((1 - u) * dy).toFixed(2)}px)`, filter: blur && u < 1 ? `blur(${((1 - u) * blur).toFixed(2)}px)` : "none" });
         return o;
       }
+      // a whip: the visual slides in from the right and leaves to the left, motion-blurred
+      function whip(el, t, a, end, { dx = 180, fi = 0.55, fo = 0.4, dy = 0 } = {}) {
+        const on = t >= a && t < end;
+        if (!on) { PF.css(el, { visibility: "hidden" }); return 0; }
+        const u = E.out(PF.clamp01((t - a) / fi)), v = E.inout(PF.clamp01((t - (end - fo)) / fo));
+        const x = (1 - u) * dx - v * dx, speed = (1 - u) + v;
+        PF.css(el, { visibility: "inherit", opacity: (Math.min(1, u * 1.6) * (1 - v)).toFixed(3), transform: `translate(${x.toFixed(1)}px, ${((1 - u) * dy).toFixed(1)}px)`, filter: speed > 0.02 ? `blur(${(speed * 14).toFixed(2)}px)` : "none" });
+        return 1 - v;
+      }
+      // a pop: spring scale for tags, badges and pills
+      function pop(el, t, a, end, { fo = 0.3 } = {}) {
+        const on = t >= a && t < end;
+        if (!on) { PF.css(el, { visibility: "hidden" }); return 0; }
+        const s = PF.step(t - a, { stiffness: 260, damping: 14 }), v = PF.clamp01((t - (end - fo)) / fo);
+        PF.css(el, { visibility: "inherit", opacity: (PF.clamp01((t - a) * 6) * (1 - v)).toFixed(3), transform: `scale(${(0.6 + 0.4 * s - 0.1 * v).toFixed(4)})` });
+        return 1;
+      }
+      // split an element's text into words (or letters) that each rise out of a mask
+      function split(el, letters = false) {
+        const walk = (node) => {
+          [...node.childNodes].forEach((c) => {
+            if (c.nodeType === 3) {
+              const parts = letters ? [...c.textContent] : c.textContent.split(/(\s+)/);
+              const frag = document.createDocumentFragment();
+              parts.forEach((w) => {
+                if (!w) return;
+                if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(" ")); return; }
+                const o = document.createElement("span"); o.className = "w";
+                const i = document.createElement("span"); i.className = "wi"; i.textContent = w;
+                o.appendChild(i); frag.appendChild(o);
+              });
+              c.replaceWith(frag);
+            } else if (c.nodeType === 1 && c.classList.contains("step")) {
+              const o = document.createElement("span"); o.className = "w";
+              c.replaceWith(o); c.classList.add("wi"); o.appendChild(c);
+            } else if (c.nodeType === 1 && c.tagName !== "BR") walk(c);
+          });
+        };
+        walk(el);
+        el.classList.add("split");
+        el._w = PF.$$(".wi", el);
+      }
+      function textIn(el, t, a, end, { stagger = 0.07, len = 0.75, out = 0.42 } = {}) {
+        const on = t >= a && t < end;
+        PF.css(el, { visibility: on ? "inherit" : "hidden" });
+        if (!on) return 0;
+        el._w.forEach((w, i) => {
+          const u = E.out(PF.clamp01((t - a - i * stagger) / len));
+          const v = end > 900 ? 0 : E.inout(PF.clamp01((t - (end - out) - i * 0.025) / (out * 0.8)));
+          PF.css(w, { transform: `translateY(${((1 - u) * 115 - v * 115).toFixed(2)}%) rotate(${((1 - u) * 7).toFixed(2)}deg)`, opacity: (Math.min(1, u * 1.5) * (1 - v)).toFixed(3) });
+        });
+        return 1;
+      }
+      // a pulse that peaks at `at` and decays: for flashes and light leaks
+      const pulse = (t, at, rise = 0.12, decay = 0.7) => (t < at - rise || t > at + decay ? 0 : t < at ? (t - (at - rise)) / rise : Math.pow(1 - (t - at) / decay, 2));
       function scene(el, t, a, end, fi = 0.5, fo = 0.5) {
         const o = win(t, a, end, fi, fo);
         PF.css(el, { visibility: o > 0.001 ? "inherit" : "hidden", opacity: o.toFixed(3) });
@@ -317,6 +393,8 @@
         S.layers = PF.$$("#layers .layer");
         S.chips = PF.$$("#chips span");
         S.psteps = PF.$$("#psteps span");
+        ["#p1", "#p2", "#p3", "#p4", "#p5", "#a1", "#a2", "#a3", "#a4", "#a5", "#a6", "#s1a", "#s1b", "#s6a", "#s6b", "#silent"].forEach((sel) => split($(sel)));
+        split($("#s1mark"), true); split($("#s6mark"), true);
         S.asteps = PF.$$("#asteps span");
         PF.debug({ grid: b, safe: CUES.safe });
       }
@@ -347,30 +425,36 @@
 
       function draw(t) {
         /* 01 opening (bars 1-4) */
-        if (scene($("#s1"), t, 0, bar(5) + 0.4, 0.001, 0.5)) {
+        const z1 = E.inout(PF.clamp01((t - (bar(5) - 0.5)) / 0.8));
+        PF.css($("#s1"), { transform: `scale(${(1 + z1 * 0.9).toFixed(4)})`, filter: z1 > 0.01 ? `blur(${(z1 * 16).toFixed(2)}px)` : "none" });
+        if (scene($("#s1"), t, 0, bar(5) + 0.35, 0.001, 0.45)) {
           const land = PF.step(t - 0.05, { stiffness: 140, damping: 15 });
           PF.css($("#s1tile"), { opacity: PF.clamp01((t - 0.05) * 3).toFixed(3), transform: `scale(${PF.lerp(0.7, 1, land).toFixed(4)})` });
-          show($("#s1mark"), t, b(1, 3), bar(6), { dy: 30, fi: 0.8 });
+          textIn($("#s1mark"), t, b(1, 3), 999, { stagger: 0.06, len: 0.7 });
           show($("#s1sound"), t, bar(2), bar(6), { dy: 10, fi: 0.8 });
-          show($("#s1a"), t, bar(3), bar(6), { dy: 40, fi: 0.8, blur: 8 });
-          show($("#s1b"), t, b(3, 3), bar(6), { dy: 40, fi: 0.8, blur: 8 });
+          textIn($("#s1a"), t, bar(3), 999, { stagger: 0.12, len: 0.9 });
+          textIn($("#s1b"), t, b(3, 3), 999, { stagger: 0.09, len: 0.8 });
           PF.css($("#s1 .glowA"), { opacity: (0.4 + 0.6 * E.soft(PF.clamp01((t - bar(4)) / 1.5))).toFixed(3) });
           PF.css($("#s1 .glowB"), { opacity: (0.2 + 0.8 * E.soft(PF.clamp01((t - bar(4)) / 1.8))).toFixed(3) });
         }
 
         /* 02 the home page (bars 5-8), opening the podcast door on the drop */
-        if (scene($("#s2"), t, bar(5), bar(9) + 0.6, 0.6, 0.6)) {
+        const z2 = 1 - E.out(PF.clamp01((t - (bar(5) - 0.2)) / 0.9));
+        PF.css($("#s2"), { transform: `scale(${(1 + z2 * 0.12).toFixed(4)})`, filter: z2 > 0.01 ? `blur(${(z2 * 10).toFixed(2)}px)` : "none" });
+        if (scene($("#s2"), t, bar(5) - 0.2, bar(9) + 0.6, 0.5, 0.6)) {
           drawDoors(S.d2, t, bar(5), { tapAt: bar(8), openAt: b(8, 3), capAt: bar(7), capEnd: b(8, 3) });
         }
 
         /* 03 podcast (bars 9-16) */
-        if (scene($("#s3"), t, bar(9), bar(17) + 0.2, 0.6, 0.2)) {
+        const shot3 = PF.clamp01((t - bar(9)) / (b.bar * 2) % 1);
+        PF.css($("#s3"), { transform: `scale(${(1 + 0.025 * shot3).toFixed(4)})` });
+        if (scene($("#s3"), t, bar(9), bar(17) + 0.2, 0.45, 0.2)) {
           show($(".eyebrow", $("#s3")), t, bar(9), bar(17) + 1, { dy: 12 });
-          show($("#p1"), t, bar(9), bar(11));
-          show($("#p2"), t, bar(11), bar(13));
-          show($("#p3"), t, bar(13), bar(15));
-          show($("#p4"), t, bar(15), bar(16));
-          show($("#p5"), t, bar(16), bar(17), { fo: 0.25 });
+          textIn($("#p1"), t, bar(9), bar(11));
+          textIn($("#p2"), t, bar(11), bar(13));
+          textIn($("#p3"), t, bar(13), bar(15));
+          textIn($("#p4"), t, bar(15), bar(16));
+          textIn($("#p5"), t, bar(16), b(16, 4, 0.5), { out: 0.3 });
           // waveform: noisy (A), hidden during upload (B), cleaning (C), clean + playhead (D)
           const wo = Math.max(win(t, bar(9) + 0.2, bar(11), 0.6, 0.35), win(t, bar(13), bar(16), 0.5, 0.4));
           PF.css($("#pwave"), { visibility: wo > 0 ? "inherit" : "hidden", opacity: wo.toFixed(3) });
@@ -379,20 +463,20 @@
             const head = t >= bar(15) ? PF.clamp01((t - bar(15)) / (b.bar * 1.5)) : -1;
             wave($("#pwave"), t, clean, { mid: 0.5, amp: 0.34, head });
           }
-          show($("#tag1"), t, b(9, 3), bar(11), { dy: 16 });
-          show($("#tag2"), t, bar(10), bar(11), { dy: 16 });
-          show($("#tag3"), t, b(10, 3), bar(11), { dy: 16 });
+          pop($("#tag1"), t, b(9, 3), bar(11));
+          pop($("#tag2"), t, bar(10), bar(11));
+          pop($("#tag3"), t, b(10, 3), bar(11));
           // upload card
-          show($("#upload"), t, bar(11), bar(13), { dy: 50 });
+          whip($("#upload"), t, bar(11), bar(13));
           const up = E.inout(PF.clamp01((t - b(11, 2)) / (b(12, 3) - b(11, 2))));
           PF.css($("#ufill"), { width: (up * 100).toFixed(2) + "%" });
           $("#upct").textContent = Math.round(up * 100) + "%";
           const done = t >= b(12, 3);
           $("#ulabel").textContent = done ? "Uploaded ✓" : "Uploading…";
           PF.css($("#ulabel"), { color: done ? "#56C8C0" : "" });
-          show($("#engineer"), t, b(13, 3), bar(15), { dy: 24 });
-          show($("#ready"), t, b(15, 2), bar(16), { dy: 16 });
-          show($("#podOffer"), t, b(15, 3), bar(16), { dy: 24 });
+          whip($("#engineer"), t, b(13, 3), bar(15), { dx: -140 });
+          pop($("#ready"), t, b(15, 2), bar(16));
+          whip($("#podOffer"), t, b(15, 3), bar(16), { dx: 160 });
           // steps indicator
           const ps = show($("#psteps"), t, bar(11), b(15, 3), { dy: 16 });
           if (ps) S.psteps.forEach((s, i) => s.classList.toggle("on", t >= bar(11 + i * 2)));
@@ -407,14 +491,19 @@
         const s4 = $("#s4");
         if (t >= b(16, 4, 0.25) && t < bar(27) + 0.6) {
           const r = E.inout(PF.clamp01((t - b(16, 4, 0.25)) / (bar(17) + 0.15 - b(16, 4, 0.25))));
-          PF.css(s4, { visibility: "inherit", opacity: win(t, 0, bar(27) + 0.6, 0.001, 0.6).toFixed(3), clipPath: r >= 1 ? "none" : `circle(${(r * 2000).toFixed(1)}px at 700px 1410px)` });
+          const z4 = E.inout(PF.clamp01((t - (bar(27) - 0.45)) / 0.75));
+          const shot4 = PF.clamp01(((t - bar(17)) / (b.bar * 2)) % 1);
+          PF.css(s4, { transform: `scale(${(1 + 0.025 * shot4 + 0.16 * z4).toFixed(4)})`, filter: z4 > 0.01 ? `blur(${(z4 * 16).toFixed(2)}px)` : "none" });
+          if (r > 0 && r < 1) PF.css($("#ring"), { visibility: "inherit", left: (700 - r * 2000).toFixed(1) + "px", top: (1410 - r * 2000).toFixed(1) + "px", width: (r * 4000).toFixed(1) + "px", height: (r * 4000).toFixed(1) + "px", opacity: (1 - r * 0.6).toFixed(3) });
+          else PF.css($("#ring"), { visibility: "hidden" });
+          PF.css(s4, { visibility: "inherit", opacity: win(t, 0, bar(27) + 0.45, 0.001, 0.45).toFixed(3), clipPath: r >= 1 ? "none" : `circle(${(r * 2000).toFixed(1)}px at 700px 1410px)` });
           show($(".eyebrow", s4), t, bar(17), bar(27), { dy: 12 });
-          show($("#a1"), t, bar(17), bar(19));
-          show($("#a2"), t, bar(19), bar(21));
-          show($("#a3"), t, bar(21), bar(22));
-          show($("#a4"), t, bar(22), bar(23));
-          show($("#a5"), t, bar(23), bar(25));
-          show($("#a6"), t, bar(25), bar(27));
+          textIn($("#a1"), t, bar(17), bar(19));
+          textIn($("#a2"), t, bar(19), bar(21));
+          textIn($("#a3"), t, bar(21), bar(22));
+          textIn($("#a4"), t, bar(22), bar(23));
+          textIn($("#a5"), t, bar(23), bar(25));
+          textIn($("#a6"), t, bar(25), bar(27));
           // the film frame: silent (A), then sound on (D)
           const fo = Math.max(win(t, bar(17) + 0.2, bar(19), 0.6, 0.4), win(t, bar(23), bar(25), 0.5, 0.4));
           PF.css($("#film"), { visibility: fo > 0 ? "inherit" : "hidden", opacity: fo.toFixed(3), transform: `translateY(${((1 - E.out(PF.clamp01((t - (t < bar(21) ? bar(17) : bar(23))) / 0.7))) * 40).toFixed(1)}px)` });
@@ -432,9 +521,9 @@
               PF.css(s, { height: (4 + rise * shape * pulse * 92).toFixed(1) + "%", background: rise > 0.02 ? `linear-gradient(to top, #A124DB, #00D2FF)` : "#2C3A4F" });
             });
           }
-          show($("#silent"), t, bar(18), bar(19), { dy: 20 });
+          textIn($("#silent"), t, bar(18), bar(19), { stagger: 0.1 });
           // four layers light up, one every two beats
-          const lo = show($("#layers"), t, bar(19), bar(21), { dy: 30 });
+          const lo = whip($("#layers"), t, bar(19), bar(21));
           if (lo) S.layers.forEach((el, i) => {
             const at = b(19, 1 + i * 2);
             const u = E.out(PF.clamp01((t - at) / 0.5));
@@ -445,40 +534,61 @@
             });
           });
           // share your link (typing) and pick a vibe (chips)
-          show($("#linkBox"), t, bar(21), bar(23), { dy: 30 });
+          whip($("#linkBox"), t, bar(21), bar(23));
           const url = "drive.google.com/…/ai-clip.mp4";
           const n = Math.floor(PF.clamp01((t - b(21, 2)) / (b.beat * 2.2)) * url.length);
           const caret = t < b(22, 1) && Math.floor(t * 4) % 2 === 0 ? "|" : "";
           $("#linkIn").textContent = url.slice(0, n) + caret;
-          show($("#chips"), t, bar(22), bar(23), { dy: 30 });
+          whip($("#chips"), t, bar(22), bar(23), { dx: -160 });
           S.chips.forEach((c, i) => c.classList.toggle("on", (i === 0 && t >= b(22, 3)) || (i === 5 && t >= b(22, 4))));
           // offers
-          show($("#off1"), t, bar(25), bar(27), { dy: 36 });
-          show($("#off2"), t, b(25, 3), bar(27), { dy: 36 });
+          whip($("#off1"), t, bar(25), bar(27));
+          whip($("#off2"), t, b(25, 3), bar(27), { dx: -180 });
           show($("#aiQuote"), t, bar(26), bar(27), { dy: 20 });
           const as = show($("#asteps"), t, bar(21), bar(25), { dy: 16 });
           if (as) S.asteps.forEach((s, i) => s.classList.toggle("on", t >= [bar(21), bar(22), bar(23)][i]));
-        } else PF.css(s4, { visibility: "hidden" });
+        } else { PF.css(s4, { visibility: "hidden" }); PF.css($("#ring"), { visibility: "hidden" }); }
 
         /* 05 both doors again (bars 27-28) */
-        if (scene($("#s5"), t, bar(27), bar(29) + 0.5, 0.6, 0.6)) {
+        const z5 = 1 - E.out(PF.clamp01((t - (bar(27) - 0.15)) / 0.9));
+        PF.css($("#s5"), { transform: `scale(${(1 + z5 * 0.12).toFixed(4)})`, filter: z5 > 0.01 ? `blur(${(z5 * 14).toFixed(2)}px)` : "none" });
+        if (scene($("#s5"), t, bar(27) - 0.15, bar(29) + 0.5, 0.45, 0.01)) {
           drawDoors(S.d5, t, bar(27), { capAt: bar(28), capEnd: bar(29) + 0.5 });
         }
 
         /* 06 lockup (bars 29-32) */
-        if (scene($("#s6"), t, bar(29), 999, 0.7, 0.001)) {
+        const w6 = E.inout(PF.clamp01((t - (bar(29) - 0.35)) / 0.8));
+        const x6 = -420 + w6 * 1900;
+        PF.css($("#s6"), { clipPath: w6 >= 1 ? "none" : `polygon(0 0, ${(x6 + 300).toFixed(1)}px 0, ${(x6 - 300).toFixed(1)}px 1920px, 0 1920px)` });
+        if (w6 > 0 && w6 < 1) PF.css($("#sweep"), { visibility: "inherit", left: (x6 - 130).toFixed(1) + "px", transform: "rotate(17deg)" });
+        else PF.css($("#sweep"), { visibility: "hidden" });
+        if (scene($("#s6"), t, bar(29) - 0.35, 999, 0.001, 0.001)) {
           const land = PF.step(t - bar(29), { stiffness: 140, damping: 15 });
           PF.css($("#s6tile"), { transform: `scale(${PF.lerp(0.75, 1, land).toFixed(4)})` });
-          show($("#s6mark"), t, b(29, 2), 999, { dy: 30, fi: 0.8 });
+          textIn($("#s6mark"), t, b(29, 2), 999, { stagger: 0.06, len: 0.7 });
           show($("#s6sound"), t, b(29, 3), 999, { dy: 10, fi: 0.8 });
-          show($("#s6a"), t, b(29, 3), 999, { dy: 36, fi: 0.8, blur: 8 });
-          show($("#s6b"), t, bar(30), 999, { dy: 36, fi: 0.8, blur: 8 });
-          show($("#url"), t, b(30, 3), 999, { dy: 24, fi: 0.7 });
+          textIn($("#s6a"), t, b(29, 3), 999, { stagger: 0.12, len: 0.9 });
+          textIn($("#s6b"), t, bar(30), 999, { stagger: 0.12, len: 0.9 });
+          pop($("#url"), t, b(30, 3), 999);
           show($("#services"), t, bar(31), 999, { dy: 16, fi: 0.8 });
           PF.css($("#s6 .glowB"), { opacity: (0.5 + 0.5 * Math.sin((t - bar(29)) * 0.8)).toFixed(3) });
         }
 
-        PF.grain($("#grain"), t, { alpha: 0.04 });
+        // light leaks on the big cuts, a flash on the drops, a light sweep on every step change
+        const big = [bar(5), bar(9), bar(17), bar(27), bar(29)];
+        const leak = Math.max(...big.map((a) => pulse(t, a, 0.25, 1.1)));
+        PF.css($("#leak"), { opacity: (leak * 0.5).toFixed(3) });
+        const flash = Math.max(pulse(t, bar(9), 0.06, 0.45), pulse(t, bar(5), 0.06, 0.35) * 0.6, pulse(t, bar(29), 0.06, 0.4) * 0.5);
+        PF.css($("#flash"), { opacity: (flash * 0.28).toFixed(3) });
+        const cuts = [bar(11), bar(13), bar(15), bar(19), bar(21), bar(22), bar(23), bar(25)];
+        let sk = null;
+        for (const c of cuts) if (t >= c - 0.3 && t < c + 0.3) sk = c;
+        if (sk !== null) {
+          const u = (t - (sk - 0.3)) / 0.6, ai = sk > bar(17);
+          const col = ai ? "0,210,255" : "243,179,68";
+          PF.css($("#streak"), { opacity: Math.sin(u * Math.PI).toFixed(3), background: `linear-gradient(105deg, transparent ${(u * 140 - 40).toFixed(1)}%, rgba(${col},.55) ${(u * 140 - 25).toFixed(1)}%, rgba(255,255,255,.35) ${(u * 140 - 20).toFixed(1)}%, rgba(${col},.4) ${(u * 140 - 15).toFixed(1)}%, transparent ${u * 140}%)` });
+        } else PF.css($("#streak"), { opacity: 0 });
+        PF.grain($("#grain"), t, { alpha: 0.045 });
       }
 
       PF.film({
